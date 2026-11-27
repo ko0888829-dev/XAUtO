@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ownership Coin — Web3 Holder App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #09090b; color: #fafafa; }
+    .glass { background: rgba(24, 24, 27, 0.75); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .gold-glow { box-shadow: 0 0 25px rgba(245, 158, 11, 0.18); }
+    .tab-active { color: #fbbf24; border-top: 2px solid #fbbf24; }
+  </style>
+</head>
+<body class="min-h-screen pb-24 select-none overflow-x-hidden">
+
+  <!-- Top Header -->
+  <header class="sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-zinc-950 font-extrabold text-base shadow-lg">
+        O
+      </div>
+      <div>
+        <div class="flex items-center gap-1.5">
+          <h1 id="ui-username" class="text-sm font-bold text-white truncate max-w-[110px]">Holder</h1>
+          <span id="ui-lv-pill" class="px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/40">
+            LV 1
+          </span>
+        </div>
+        <p class="text-[11px] text-zinc-400">Ownership Protocol</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <!-- Admin Button (Admin ID ဖြစ်မှသာ ပေါ်မည်) -->
+      <button id="btn-admin-open" onclick="switchTab('admin')" class="hidden px-2.5 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold">
+        ⚙️ Admin
+      </button>
+      <div id="ton-connect"></div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-md mx-auto p-4 space-y-4">
+
+    <!-- ==================== TAB 1: HOME ==================== -->
+    <section id="tab-home" class="space-y-4">
+
+      <!-- Hero Balance Card -->
+      <div class="relative rounded-3xl p-5 bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/30 border border-amber-500/25 gold-glow overflow-hidden">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ownership Balance</span>
+          <span id="ui-boost-badge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            1.0x Boost
+          </span>
+        </div>
+
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="ui-points" class="text-4xl font-extrabold tracking-tight text-white">0</span>
+          <span class="text-sm font-bold text-amber-400">PTS</span>
+        </div>
+
+        <!-- Level Progress Bar -->
+        <div class="mt-5 bg-zinc-950/80 p-3.5 rounded-2xl border border-zinc-800/80">
+          <div class="flex justify-between text-xs mb-1.5">
+            <span class="font-bold text-amber-400">Holder Level <span id="ui-level">1</span></span>
+            <span class="text-zinc-400"><span id="ui-token-bal">0</span> / <span id="ui-next-req">1,000</span> Tokens</span>
+          </div>
+          <div class="w-full h-2.5 bg-zinc-800 rounded-full overflow-hidden">
+            <div id="ui-lv-bar" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 rounded-full transition-all duration-500" style="width: 5%"></div>
+          </div>
+          <p id="ui-lv-hint" class="text-[11px] text-zinc-400 mt-2">
+            Hold tokens in your wallet to level up & unlock withdrawals!
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="grid grid-cols-2 gap-3">
+        <a href="https://dedust.io/swap/TON/EQA1R_LuQCLHlMgOo1S4G7Y7W1cd0FrAkbA10Zq7rddKxi9k" target="_blank"
+           class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-extrabold text-xs shadow-lg shadow-amber-500/20 active:scale-95 transition">
+          💎 Buy Token (Level Up)
+        </a>
+        <button onclick="switchTab('withdraw')"
+                class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl glass hover:bg-zinc-800 text-white font-bold text-xs active:scale-95 transition">
+          💸 Withdraw Rewards
+        </button>
+      </div>
+
+      <!-- Daily Check-in Card -->
+      <div class="glass rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-sm text-white">🔥 Daily Holder Check-in</h3>
+          <p class="text-xs text-zinc-400 mt-0.5">Earn <span id="ui-daily-amt" class="text-amber-400 font-bold">+200</span> PTS × Level Boost</p>
+        </div>
+        <button id="btn-daily" onclick="claimDaily()"
+                class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs transition">
+          Claim
+        </button>
+      </div>
+
+      <!-- Contract Info -->
+      <div class="glass rounded-2xl p-3.5 flex items-center justify-between text-xs">
+        <span class="text-zinc-400">Token CA:</span>
+        <button onclick="copyCA()" class="font-mono text-amber-400 hover:underline">
+          EQA1R_LuQ...rddKxi9k 📋
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: TASKS ==================== -->
+    <section id="tab-tasks" class="hidden space-y-3">
+      <div class="flex justify-between items-center">
+        <h2 class="text-base font-extrabold text-white">🎯 Ownership Quests</h2>
+        <span class="text-xs text-amber-400 font-semibold">Level Boost Active</span>
+      </div>
+      <div id="tasks-container" class="space-y-2.5">
+        <p class="text-xs text-zinc-500 text-center py-6">Loading quests...</p>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: FRIENDS ==================== -->
+    <section id="tab-friends" class="hidden space-y-4">
+      <div class="glass rounded-3xl p-5 text-center space-y-3">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl">
+          🤝
+        </div>
+        <h2 class="text-lg font-extrabold text-white">Invite Friends, Earn Together</h2>
+        <p class="text-xs text-zinc-400">
+          Get <span id="ui-ref-bonus" class="text-amber-400 font-bold">+500 PTS</span> for every friend who joins via your link!
+        </p>
+
+        <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 flex justify-around">
+          <div>
+            <p class="text-[11px] text-zinc-400">Total Invited</p>
+            <p id="ui-ref-count" class="text-xl font-extrabold text-white mt-0.5">0</p>
+          </div>
+          <div class="w-px bg-zinc-800"></div>
+          <div>
+            <p class="text-[11px] text-zinc-400">Referral Earnings</p>
+            <p id="ui-ref-earned" class="text-xl font-extrabold text-emerald-400 mt-0.5">0 PTS</p>
+          </div>
+        </div>
+
+        <button onclick="copyInviteLink()"
+                class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-extrabold text-sm shadow-lg active:scale-95 transition">
+          📋 Copy Personal Invite Link
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: WITHDRAW ==================== -->
+    <section id="tab-withdraw" class="hidden space-y-4">
+      <div class="glass rounded-3xl p-5 space-y-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-base font-extrabold text-white">💸 Withdraw Tokens</h2>
+          <span id="wd-req-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+            Requires LV 3
+          </span>
+        </div>
+
+        <!-- Eligibility Status Box -->
+        <div id="wd-status-box" class="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2 text-xs">
+          <div class="flex justify-between">
+            <span class="text-zinc-400">1. Wallet Connected:</span>
+            <span id="chk-wallet" class="font-bold text-rose-400">❌ Not Connected</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-zinc-400">2. Holder Level (<span id="lbl-min-lv">Lv 3</span>+):</span>
+            <span id="chk-level" class="font-bold text-rose-400">❌ Current Lv 1</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-zinc-400">3. Min Balance (<span id="lbl-min-wd">5,000</span> PTS):</span>
+            <span id="chk-pts" class="font-bold text-rose-400">❌ 0 PTS</span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-xs text-zinc-400">Amount to Withdraw (PTS)</label>
+          <input id="wd-amount" type="number" placeholder="Enter PTS amount"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-amber-500" />
+        </div>
+
+        <button id="btn-submit-wd" onclick="submitWithdraw()"
+                class="w-full py-3.5 rounded-2xl bg-amber-500 text-zinc-950 font-extrabold text-sm disabled:opacity-40 transition">
+          Request Withdrawal
+        </button>
+      </div>
+
+      <!-- Withdraw History -->
+      <div class="glass rounded-2xl p-4 space-y-2">
+        <h3 class="text-xs font-bold text-zinc-400 uppercase">Your Withdrawal History</h3>
+        <div id="wd-history" class="space-y-2 text-xs text-zinc-400">
+          No withdrawals yet.
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: ADMIN PANEL ==================== -->
+    <section id="tab-admin" class="hidden space-y-4">
+      <div class="glass rounded-3xl p-4 border border-rose-500/30 space-y-4">
+        <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
+          <h2 class="text-base font-extrabold text-rose-400">⚙️ Admin Control Panel</h2>
+          <span class="text-[11px] text-zinc-400">Live Firebase Sync</span>
+        </div>
+
+        <!-- System Settings -->
+        <div class="space-y-3 text-xs">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-zinc-400 block mb-1">Min Withdraw Level</label>
+              <input id="adm-min-lv" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
+            </div>
+            <div>
+              <label class="text-zinc-400 block mb-1">Tokens Per Level</label>
+              <input id="adm-tok-per-lv" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-zinc-400 block mb-1">Min Withdraw PTS</label>
+              <input id="adm-min-wd" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
+            </div>
+            <div>
+              <label class="text-zinc-400 block mb-1">Referral Bonus PTS</label>
+              <input id="adm-ref-bonus" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-zinc-400 block mb-1">Daily Check-in Reward PTS</label>
+            <input id="adm-daily-pts" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
+          </div>
+
+          <button onclick="saveAdminSettings()"
+                  class="w-full py-3 rounded-xl bg-emerald-500 text-zinc-950 font-extrabold text-xs">
+            💾 Save System Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- Add New Task -->
+      <div class="glass rounded-3xl p-4 space-y-3 text-xs">
+        <h3 class="font-extrabold text-sm text-white">➕ Add New Quest / Task</h3>
+        <input id="adm-task-title" type="text" placeholder="Task Title (e.g. Join Telegram Channel)"
+               class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white" />
+        <div class="grid grid-cols-2 gap-2">
+          <input id="adm-task-reward" type="number" placeholder="Reward PTS (e.g. 500)"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white" />
+          <input id="adm-task-url" type="text" placeholder="Link (https://t.me/...)"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white" />
+        </div>
+        <button onclick="addNewTask()"
+                class="w-full py-2.5 rounded-xl bg-amber-500 text-zinc-950 font-extrabold">
+          + Add Task
+        </button>
+      </div>
+
+      <!-- Pending Withdraw Requests -->
+      <div class="glass rounded-3xl p-4 space-y-3 text-xs">
+        <h3 class="font-extrabold text-sm text-white">📥 Pending Withdrawals</h3>
+        <div id="adm-wd-list" class="space-y-2">
+          <p class="text-zinc-500">No pending requests.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="fixed bottom-0 inset-x-0 z-30 glass border-t border-zinc-800">
+    <div class="max-w-md mx-auto grid grid-cols-4 text-center">
+      <button onclick="switchTab('home')" id="nav-home" class="py-3 flex flex-col items-center gap-1 tab-active">
+        <span class="text-lg">🏠</span>
+        <span class="text-[10px] font-bold">Home</span>
+      </button>
+      <button onclick="switchTab('tasks')" id="nav-tasks" class="py-3 flex flex-col items-center gap-1 text-zinc-400">
+        <span class="text-lg">🎯</span>
+        <span class="text-[10px] font-bold">Quests</span>
+      </button>
+      <button onclick="switchTab('friends')" id="nav-friends" class="py-3 flex flex-col items-center gap-1 text-zinc-400">
+        <span class="text-lg">👥</span>
+        <span class="text-[10px] font-bold">Friends</span>
+      </button>
+      <button onclick="switchTab('withdraw')" id="nav-withdraw" class="py-3 flex flex-col items-center gap-1 text-zinc-400">
+        <span class="text-lg">💸</span>
+        <span class="text-[10px] font-bold">Withdraw</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Firebase & App Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, get, set, update, push, remove, onValue, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    // ⚠️ သင့် Firebase Config (adpro-bot) အမှန်ကို ဒီမှာ အစားထိုးထည့်ပါ
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "adpro-bot.firebaseapp.com",
+      databaseURL: "https://adpro-bot-default-rtdb.firebaseio.com",
+      projectId: "adpro-bot",
+      storageBucket: "adpro-bot.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // ⚠️ Admin Telegram Numeric User IDs များကို ဒီမှာ ထည့်ပါ (ဥပမာ: ["123456789"])
+    const ADMIN_IDS = ["YOUR_TELEGRAM_ID"];
+    const JETTON_MASTER = "EQA1R_LuQCLHlMgOo1S4G7Y7W1cd0FrAkbA10Zq7rddKxi9k";
+    const BOT_USERNAME = "YOUR_BOT_USERNAME"; // @ မပါဘဲ Bot Username ထည့်ပါ
+
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const tgUser = tg.initDataUnsafe?.user || { id: "demo_user_1", first_name: "Crypto Holder", username: "holder" };
+    const userId = String(tgUser.id);
+    const startParam = tg.initDataUnsafe?.start_param || "";
+
+    // Show Admin Button if ID matches
+    if (ADMIN_IDS.includes(userId) || userId === "demo_user_1") {
+      document.getElementById("btn-admin-open").classList.remove("hidden");
+    }
+
+    document.getElementById("ui-username").innerText = tgUser.first_name || "Holder";
+
+    // Global State
+    let config = {
+      minWithdrawLevel: 3,
+      tokensPerLevel: 1000,
+      minWithdrawPts: 5000,
+      refBonus: 500,
+      dailyReward: 200
+    };
+    let userData = { points: 0, refCount: 0, completedTasks: {}, lastDaily: 0 };
+    let walletAddress = null;
+    let tokenBalance = 0;
+    let currentLevel = 1;
+
+    // 1. Load & Listen to Admin Config
+    onValue(ref(db, "ownership_v1/config"), (snap) => {
+      if (snap.exists()) {
+        config = { ...config, ...snap.val() };
+      } else {
+        set(ref(db, "ownership_v1/config"), config);
+      }
+      updateConfigUI();
+      recalcLevel();
+    });
+
+    function updateConfigUI() {
+      document.getElementById("ui-daily-amt").innerText = `+${config.dailyReward}`;
+      document.getElementById("ui-ref-bonus").innerText = `+${config.refBonus} PTS`;
+      document.getElementById("wd-req-badge").innerText = `Requires LV ${config.minWithdrawLevel}`;
+      document.getElementById("lbl-min-lv").innerText = `Lv ${config.minWithdrawLevel}`;
+      document.getElementById("lbl-min-wd").innerText = Number(config.minWithdrawPts).toLocaleString();
+
+      // Populate Admin Inputs
+      document.getElementById("adm-min-lv").value = config.minWithdrawLevel;
+      document.getElementById("adm-tok-per-lv").value = config.tokensPerLevel;
+      document.getElementById("adm-min-wd").value = config.minWithdrawPts;
+      document.getElementById("adm-ref-bonus").value = config.refBonus;
+      document.getElementById("adm-daily-pts").value = config.dailyReward;
+    }
+
+    // 2. Initialize User & Handle Referral
+    async function initUser() {
+      const uRef = ref(db, `ownership_v1/users/${userId}`);
+      const snap = await get(uRef);
+      if (!snap.exists()) {
+        let invitedBy = null;
+        if (startParam && startParam.startsWith("ref_")) {
+          const refId = startParam.replace("ref_", "");
+          if (refId !== userId) {
+            invitedBy = refId;
+            await update(ref(db, `ownership_v1/users/${refId}`), {
+              points: increment(Number(config.refBonus)),
+              refCount: increment(1)
+            });
+          }
+        }
+        await set(uRef, {
+          name: tgUser.first_name || "Holder",
+          username: tgUser.username || "",
+          points: 100,
+          refCount: 0,
+          invitedBy,
+          lastDaily: 0,
+          completedTasks: {},
+          createdAt: Date.now()
+        });
+      }
+
+      onValue(uRef, (s) => {
+        if (s.exists()) {
+          userData = s.val();
+          renderUserUI();
+        }
+      });
+    }
+
+    function renderUserUI() {
+      document.getElementById("ui-points").innerText = Number(userData.points || 0).toLocaleString();
+      document.getElementById("ui-ref-count").innerText = userData.refCount || 0;
+      document.getElementById("ui-ref-earned").innerText = `${((userData.refCount || 0) * config.refBonus).toLocaleString()} PTS`;
+
+      // Daily Button State (24h cooldown)
+      const now = Date.now();
+      const canDaily = (now - (userData.lastDaily || 0)) >= 86400000;
+      const btnDaily = document.getElementById("btn-daily");
+      if (!canDaily) {
+        btnDaily.innerText = "Claimed ✓";
+        btnDaily.disabled = true;
+        btnDaily.classList.add("opacity-50");
+      } else {
+        btnDaily.innerText = "Claim";
+        btnDaily.disabled = false;
+        btnDaily.classList.remove("opacity-50");
+      }
+
+      updateWithdrawChecks();
+      renderTasks();
+    }
+
+    // 3. Level Calculation from Wallet Token Balance
+    function recalcLevel() {
+      const perLv = Math.max(1, Number(config.tokensPerLevel));
+      currentLevel = Math.floor(tokenBalance / perLv) + 1;
+      const nextLvTokens = currentLevel * perLv;
+      const prevLvTokens = (currentLevel - 1) * perLv;
+      const progress = Math.min(100, Math.max(4, ((tokenBalance - prevLvTokens) / perLv) * 100));
+      const boost = (1 + (currentLevel - 1) * 0.2).toFixed(1);
+
+      document.getElementById("ui-level").innerText = currentLevel;
+      document.getElementById("ui-lv-pill").innerText = `LV ${currentLevel}`;
+      document.getElementById("ui-boost-badge").innerText = `${boost}x Boost`;
+      document.getElementById("ui-token-bal").innerText = tokenBalance.toLocaleString(undefined, { maximumFractionDigits: 1 });
+      document.getElementById("ui-next-req").innerText = nextLvTokens.toLocaleString();
+      document.getElementById("ui-lv-bar").style.width = `${progress}%`;
+
+      if (currentLevel >= config.minWithdrawLevel) {
+        document.getElementById("ui-lv-hint").innerHTML = `<span class="text-emerald-400 font-semibold">✅ Level ${config.minWithdrawLevel}+ Unlocked! Withdrawals enabled.</span>`;
+      } else {
+        const needed = (config.minWithdrawLevel - 1) * perLv - tokenBalance;
+        document.getElementById("ui-lv-hint").innerHTML = `Hold <strong class="text-amber-400">${Math.ceil(needed).toLocaleString()} more tokens</strong> to reach Lv ${config.minWithdrawLevel} & unlock withdrawals.`;
+      }
+
+      updateWithdrawChecks();
+    }
+
+    // 4. TonAPI Jetton Balance Fetch
+    async function fetchJettonBalance(addr) {
+      try {
+        const res = await fetch(`https://tonapi.io/v2/accounts/${addr}/jettons/${JETTON_MASTER}`);
+        if (!res.ok) {
+          tokenBalance = 0;
+        } else {
+          const data = await res.json();
+          const dec = data.jetton?.decimals ?? 9;
+          tokenBalance = Number(data.balance) / Math.pow(10, dec);
+        }
+      } catch {
+        tokenBalance = 0;
+      }
+      recalcLevel();
+      await update(ref(db, `ownership_v1/users/${userId}`), {
+        wallet: addr,
+        tokenBalance,
+        level: currentLevel
+      });
+    }
+
+    // 5. Tasks Render & Complete
+    let allTasks = {};
+    onValue(ref(db, "ownership_v1/tasks"), (snap) => {
+      if (snap.exists()) {
+        allTasks = snap.val();
+      } else {
+        const defaults = {
+          t1: { title: "Join Ownership Official Channel", reward: 500, url: "https://t.me/telegram" },
+          t2: { title: "Follow Ownership on X (Twitter)", reward: 400, url: "https://x.com" }
+        };
+        set(ref(db, "ownership_v1/tasks"), defaults);
+        allTasks = defaults;
+      }
+      renderTasks();
+    });
+
+    function renderTasks() {
+      const box = document.getElementById("tasks-container");
+      const done = userData.completedTasks || {};
+      const entries = Object.entries(allTasks);
+      if (!entries.length) {
+        box.innerHTML = `<p class="text-xs text-zinc-500 text-center py-6">No quests available.</p>`;
+        return;
+      }
+      box.innerHTML = entries.map(([id, t]) => {
+        const isDone = !!done[id];
+        return `
+          <div class="glass rounded-2xl p-3.5 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-bold text-white">${t.title}</p>
+              <p class="text-xs text-amber-400 font-semibold mt-0.5">+${t.reward} PTS</p>
+            </div>
+            <div class="flex items-center gap-2">
+              ${ADMIN_IDS.includes(userId) || userId === "demo_user_1" ? `<button onclick="deleteTask('${id}')" class="text-rose-400 text-xs px-2 py-1">🗑️</button>` : ""}
+              <button ${isDone ? "disabled" : ""} onclick="doTask('${id}', ${t.reward}, '${t.url}')"
+                class="px-4 py-2 rounded-xl text-xs font-extrabold ${isDone ? "bg-zinc-800 text-zinc-500" : "bg-amber-500 text-zinc-950"}">
+                ${isDone ? "Done ✓" : "Start"}
+              </button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    window.doTask = async (id, baseReward, url) => {
+      if (url && url.startsWith("http")) window.open(url, "_blank");
+      const boost = 1 + (currentLevel - 1) * 0.2;
+      const finalPts = Math.round(baseReward * boost);
+      await update(ref(db, `ownership_v1/users/${userId}`), {
+        points: increment(finalPts),
+        [`completedTasks/${id}`]: true
+      });
+      tg.HapticFeedback?.notificationOccurred("success");
+    };
+
+    window.claimDaily = async () => {
+      const boost = 1 + (currentLevel - 1) * 0.2;
+      const finalPts = Math.round(Number(config.dailyReward) * boost);
+      await update(ref(db, `ownership_v1/users/${userId}`), {
+        points: increment(finalPts),
+        lastDaily: Date.now()
+      });
+      tg.HapticFeedback?.notificationOccurred("success");
+    };
+
+    // 6. Withdraw Eligibility & Submission
+    function updateWithdrawChecks() {
+      const okWallet = !!walletAddress;
+      const okLv = currentLevel >= Number(config.minWithdrawLevel);
+      const okPts = Number(userData.points || 0) >= Number(config.minWithdrawPts);
+
+      document.getElementById("chk-wallet").innerHTML = okWallet ? `<span class="text-emerald-400">✅ Connected</span>` : `<span class="text-rose-400">❌ Connect Wallet</span>`;
+      document.getElementById("chk-level").innerHTML = okLv ? `<span class="text-emerald-400">✅ Lv ${currentLevel}</span>` : `<span class="text-rose-400">❌ Current Lv ${currentLevel}</span>`;
+      document.getElementById("chk-pts").innerHTML = okPts ? `<span class="text-emerald-400">✅ ${Number(userData.points).toLocaleString()} PTS</span>` : `<span class="text-rose-400">❌ ${Number(userData.points || 0).toLocaleString()} PTS</span>`;
+
+      document.getElementById("btn-submit-wd").disabled = !(okWallet && okLv && okPts);
+    }
+
+    window.submitWithdraw = async () => {
+      const amt = Number(document.getElementById("wd-amount").value);
+      if (amt < config.minWithdrawPts || amt > userData.points) {
+        return alert(`Enter amount between ${config.minWithdrawPts} and ${userData.points} PTS.`);
+      }
+      await update(ref(db, `ownership_v1/users/${userId}`), {
+        points: increment(-amt)
+      });
+      await push(ref(db, "ownership_v1/withdrawals"), {
+        userId,
+        name: tgUser.first_name || "User",
+        wallet: walletAddress,
+        amount: amt,
+        level: currentLevel,
+        status: "pending",
+        createdAt: Date.now()
+      });
+      document.getElementById("wd-amount").value = "";
+      alert("✅ Withdrawal request submitted!");
+    };
+
+    // Listen to Withdrawals (for User History & Admin Queue)
+    onValue(ref(db, "ownership_v1/withdrawals"), (snap) => {
+      const data = snap.val() || {};
+      const list = Object.entries(data).reverse();
+
+      // User History
+      const mine = list.filter(([, w]) => w.userId === userId);
+      document.getElementById("wd-history").innerHTML = mine.length ? mine.map(([, w]) => `
+        <div class="flex justify-between items-center bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
+          <span>${Number(w.amount).toLocaleString()} PTS</span>
+          <span class="uppercase font-bold ${w.status === 'paid' ? 'text-emerald-400' : w.status === 'rejected' ? 'text-rose-400' : 'text-amber-400'}">${w.status}</span>
+        </div>`).join("") : "No withdrawals yet.";
+
+      // Admin Pending Queue
+      const pending = list.filter(([, w]) => w.status === "pending");
+      document.getElementById("adm-wd-list").innerHTML = pending.length ? pending.map(([wid, w]) => `
+        <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2">
+          <div class="flex justify-between">
+            <span class="font-bold text-white">${w.name} (Lv ${w.level})</span>
+            <span class="font-extrabold text-amber-400">${Number(w.amount).toLocaleString()} PTS</span>
+          </div>
+          <p class="text-[10px] font-mono text-zinc-400 truncate">${w.wallet}</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="resolveWd('${wid}', 'paid')" class="py-1.5 rounded-lg bg-emerald-500 text-zinc-950 font-bold">Approve ✓</button>
+            <button onclick="resolveWd('${wid}', 'rejected')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold">Reject ✕</button>
+          </div>
+        </div>`).join("") : `<p class="text-zinc-500">No pending requests.</p>`;
+    });
+
+    // 7. Admin Functions
+    window.saveAdminSettings = async () => {
+      await set(ref(db, "ownership_v1/config"), {
+        minWithdrawLevel: Number(document.getElementById("adm-min-lv").value) || 3,
+        tokensPerLevel: Number(document.getElementById("adm-tok-per-lv").value) || 1000,
+        minWithdrawPts: Number(document.getElementById("adm-min-wd").value) || 5000,
+        refBonus: Number(document.getElementById("adm-ref-bonus").value) || 500,
+        dailyReward: Number(document.getElementById("adm-daily-pts").value) || 200
+      });
+      alert("✅ Settings Updated Live!");
+    };
+
+    window.addNewTask = async () => {
+      const title = document.getElementById("adm-task-title").value.trim();
+      const reward = Number(document.getElementById("adm-task-reward").value);
+      const url = document.getElementById("adm-task-url").value.trim();
+      if (!title || !reward) return alert("Enter title and reward!");
+      await push(ref(db, "ownership_v1/tasks"), { title, reward, url });
+      document.getElementById("adm-task-title").value = "";
+      document.getElementById("adm-task-reward").value = "";
+      document.getElementById("adm-task-url").value = "";
+      alert("✅ New Task Added!");
+    };
+
+    window.deleteTask = async (id) => {
+      await remove(ref(db, `ownership_v1/tasks/${id}`));
+    };
+
+    window.resolveWd = async (wid, status) => {
+      await update(ref(db, `ownership_v1/withdrawals/${wid}`), { status });
+    };
+
+    // Helpers
+    window.copyInviteLink = () => {
+      const link = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+      navigator.clipboard.writeText(link);
+      alert("Invite Link Copied:\n" + link);
+    };
+
+    window.copyCA = () => {
+      navigator.clipboard.writeText(JETTON_MASTER);
+      alert("Contract Address Copied!");
+    };
+
+    window.switchTab = (name) => {
+      ["home", "tasks", "friends", "withdraw", "admin"].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add("hidden");
+        const nav = document.getElementById(`nav-${t}`);
+        if (nav) {
+          nav.classList.remove("tab-active");
+          nav.classList.add("text-zinc-400");
+        }
+      });
+      document.getElementById(`tab-${name}`).classList.remove("hidden");
+      const activeNav = document.getElementById(`nav-${name}`);
+      if (activeNav) {
+        activeNav.classList.add("tab-active");
+        activeNav.classList.remove("text-zinc-400");
+      }
+    };
+
+    // TON Connect Setup
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
+      buttonRootId: "ton-connect"
+    });
+
+    tonConnectUI.onStatusChange(wallet => {
+      if (wallet && wallet.account) {
+        walletAddress = wallet.account.address;
+        fetchJettonBalance(walletAddress);
+      } else {
+        walletAddress = null;
+        tokenBalance = 0;
+        recalcLevel();
+      }
+    });
+
+    initUser();
+  </script>
+</body>
+</html>
