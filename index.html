@@ -35,7 +35,6 @@
   <!-- TOP HEADER -->
   <header class="px-4 pt-4 pb-2 flex items-center justify-between">
     <div class="flex items-center gap-3" onclick="handleSecretAdminTap()">
-      <!-- PZM Official Purple Coin SVG -->
       <svg class="w-10 h-10 shrink-0 shadow-lg rounded-full" viewBox="0 0 100 100">
         <defs>
           <radialGradient id="pzmPurpleGrad" cx="35%" cy="25%" r="75%">
@@ -73,14 +72,20 @@
     <!-- ==================== TAB 1: MINE ==================== -->
     <section id="tab-mine" class="space-y-4">
 
-      <!-- Session & Elapsed Pill -->
+      <!-- Session & Hourly Rate Pill -->
       <div class="space-y-2">
-        <div class="flex items-center gap-2">
-          <span class="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-bold tracking-wider text-zinc-300">SESSION</span>
-          <span id="mine-status-pill" class="px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-[11px] font-bold text-rose-400 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-rose-400"></span> NOT VERIFIED
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-bold tracking-wider text-zinc-300">SESSION</span>
+            <span id="mine-status-pill" class="px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-[11px] font-bold text-rose-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-400"></span> NOT VERIFIED
+            </span>
+          </div>
+          <span id="mine-hourly-badge" class="px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-[11px] font-extrabold text-purple-300">
+            ⚡ 4.00 PZM/hr
           </span>
         </div>
+
         <div class="inline-block px-3.5 py-1 rounded-full bg-zinc-900/90 border border-zinc-800 text-xs text-zinc-300">
           <span id="mine-elapsed">0h 0m elapsed</span> • <span id="mine-session-earned" class="text-white font-semibold">0.0000 PZM</span> earned
         </div>
@@ -124,7 +129,6 @@
       <div class="text-center py-2 space-y-4">
         <div id="live-ticker" class="text-3xl font-extrabold text-amber-300 tracking-wide">+0.0000</div>
 
-        <!-- Center PZM Coin Logo -->
         <div class="relative w-40 h-40 mx-auto flex items-center justify-center">
           <svg class="pzm-coin-anim w-full h-full" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="48" fill="url(#pzmPurpleGrad)" />
@@ -154,7 +158,6 @@
         + Promote a task
       </button>
 
-      <!-- Promote Task Form -->
       <div id="promote-task-box" class="hidden oc-card rounded-3xl p-4 space-y-3 border border-emerald-500/30">
         <p class="text-[11px] font-bold tracking-widest text-emerald-400 uppercase">TASK PROMOTION</p>
         <h3 class="text-lg font-extrabold text-white">Promote your task</h3>
@@ -182,7 +185,6 @@
         </button>
       </div>
 
-      <!-- Active Tasks List -->
       <div id="tasks-list" class="space-y-3">
         <p class="text-xs text-zinc-500 text-center py-6">Loading tasks...</p>
       </div>
@@ -201,7 +203,6 @@
         </button>
       </div>
 
-      <!-- Trade Box -->
       <div class="oc-card rounded-3xl p-4 space-y-3 border border-emerald-500/20">
         <p class="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">DEDUST • LIVE ESTIMATE</p>
         <h3 class="text-lg font-extrabold text-white">Trade PZM</h3>
@@ -230,7 +231,6 @@
         </a>
       </div>
 
-      <!-- Live Market Stats Cards -->
       <div class="space-y-2.5">
         <div class="oc-card rounded-2xl p-4">
           <p class="text-[10px] tracking-widest text-zinc-400 uppercase">PRICE • USD</p>
@@ -285,33 +285,56 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 5: PROFILE ==================== -->
+    <!-- ==================== TAB 5: PROFILE (LEVEL 1-100 + UPGRADE + WITHDRAW) ==================== -->
     <section id="tab-profile" class="hidden space-y-4">
 
       <div class="oc-card rounded-3xl p-4 space-y-3 border border-purple-500/30">
         <div class="flex justify-between items-center">
           <div>
-            <p class="text-xs text-zinc-400">Account Status</p>
+            <p class="text-xs text-zinc-400">Miner Profile (Max LV 100)</p>
             <h2 id="prof-name" class="text-lg font-extrabold text-white">Holder</h2>
           </div>
           <span id="prof-lv-badge" class="px-3 py-1 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/40 font-extrabold text-sm">
-            Level 1
+            Level 1 / 100
           </span>
         </div>
 
-        <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800 flex justify-between items-center text-xs">
-          <span class="text-zinc-400">Mining Speed Multiplier:</span>
-          <span id="prof-speed" class="font-extrabold text-emerald-400">1.0x Speed</span>
+        <!-- Hourly Mining Rate Comparison Box -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800">
+            <p class="text-[10px] text-zinc-400 uppercase">Current Rate</p>
+            <p id="prof-curr-rate" class="text-sm font-extrabold text-emerald-400 mt-0.5">4.00 PZM / hr</p>
+          </div>
+          <div class="bg-[#0b0d12] p-3 rounded-2xl border border-purple-500/30">
+            <p class="text-[10px] text-zinc-400 uppercase">Next Level Rate</p>
+            <p id="prof-next-rate" class="text-sm font-extrabold text-purple-300 mt-0.5">5.00 PZM / hr</p>
+          </div>
         </div>
 
-        <!-- Upgrade Level Section -->
-        <div class="pt-2 border-t border-zinc-800 space-y-2.5">
+        <!-- Level 1-100 Progress Bar -->
+        <div>
+          <div class="flex justify-between text-[11px] text-zinc-400 mb-1">
+            <span>Level Progress</span>
+            <span id="prof-lv-pct">1%</span>
+          </div>
+          <div class="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div id="prof-lv-bar" class="h-full bg-gradient-to-r from-purple-500 to-amber-400 rounded-full" style="width: 1%"></div>
+          </div>
+        </div>
+
+        <!-- View All 1-100 Levels Button -->
+        <button onclick="openLevelsModal()" class="w-full py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs font-bold text-purple-300 hover:bg-zinc-800 transition">
+          📊 View Level 1 – 100 Hourly Rates & Prices
+        </button>
+
+        <!-- Upgrade Level Section (Hidden if already LV 100) -->
+        <div id="upgrade-box-area" class="pt-2 border-t border-zinc-800 space-y-2.5">
           <div class="flex justify-between items-center">
             <h3 class="text-sm font-extrabold text-white">⬆️ Upgrade to Level <span id="next-lv-num">2</span></h3>
             <span class="text-xs font-bold text-purple-400">Cost: <span id="next-lv-cost">500</span> PZM</span>
           </div>
           <p class="text-[11px] text-zinc-400">
-            Send <strong id="next-lv-cost-2" class="text-white">500 PZM</strong> to the admin wallet below to upgrade your Level & unlock Lv <span id="cfg-min-wd-lv">3</span>+ withdrawals:
+            Send <strong id="next-lv-cost-2" class="text-white">500 PZM</strong> to the admin wallet below to boost your hourly rate to <strong id="next-lv-rate-hint" class="text-emerald-400">5.00 PZM/hr</strong> & unlock Lv <span id="cfg-min-wd-lv">3</span>+ withdrawals:
           </p>
           <div class="bg-[#0b0d12] p-2.5 rounded-xl border border-zinc-800 flex items-center justify-between gap-2">
             <span class="text-[10px] font-mono text-amber-300 truncate">UQBgIJ-WwfvyRgpAb58MXYYA37CvJ-MO55Kc_vH_tJmC8Ugy</span>
@@ -354,12 +377,12 @@
           <span class="text-[10px] text-zinc-400">Admin ID: 5330848428</span>
         </div>
 
-        <!-- Direct User Level Setter -->
+        <!-- Direct User Level Setter (1 to 100) -->
         <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800 space-y-2 text-xs">
-          <p class="font-bold text-amber-300">👑 Set User Level Directly</p>
+          <p class="font-bold text-amber-300">👑 Set User Level Directly (LV 1 – 100)</p>
           <div class="grid grid-cols-2 gap-2">
             <input id="adm-target-uid" type="text" placeholder="User Telegram ID" class="bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-white" />
-            <input id="adm-target-lv" type="number" placeholder="New Level (e.g. 3)" class="bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-white" />
+            <input id="adm-target-lv" type="number" min="1" max="100" placeholder="Level (1 - 100)" class="bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-white" />
           </div>
           <button onclick="adminSetUserLevel()" class="w-full py-2 rounded-xl gold-btn font-extrabold">
             Update User Level
@@ -371,34 +394,39 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="text-zinc-400 block mb-1">Min Withdraw Level</label>
-              <input id="adm-min-wd-lv" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+              <input id="adm-min-wd-lv" type="number" min="1" max="100" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
             <div>
-              <label class="text-zinc-400 block mb-1">PZM Cost Per Level</label>
+              <label class="text-zinc-400 block mb-1">Base PZM Cost / LV</label>
               <input id="adm-lv-cost" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="text-zinc-400 block mb-1">Mining Rate (PZM/hr)</label>
+              <label class="text-zinc-400 block mb-1">LV 1 Base Rate (PZM/hr)</label>
               <input id="adm-mine-rate" type="number" step="0.1" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
             <div>
-              <label class="text-zinc-400 block mb-1">Min Withdraw PZM</label>
-              <input id="adm-min-wd-amt" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+              <label class="text-zinc-400 block mb-1">+PZM/hr Bonus Per LV</label>
+              <input id="adm-lv-bonus-rate" type="number" step="0.1" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
+              <label class="text-zinc-400 block mb-1">Min Withdraw PZM</label>
+              <input id="adm-min-wd-amt" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+            </div>
+            <div>
               <label class="text-zinc-400 block mb-1">Referral Reward (PZM)</label>
               <input id="adm-ref-rew" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
-            <div>
-              <label class="text-zinc-400 block mb-1">Admin Secret PIN</label>
-              <input id="adm-pin" type="text" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
-            </div>
+          </div>
+
+          <div>
+            <label class="text-zinc-400 block mb-1">Admin Secret PIN</label>
+            <input id="adm-pin" type="text" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
           </div>
 
           <button onclick="saveAdminConfig()" class="w-full py-2.5 rounded-xl mint-btn font-extrabold">
@@ -429,6 +457,20 @@
     </section>
 
   </main>
+
+  <!-- LEVEL 1 - 100 RATES TABLE MODAL -->
+  <div id="levels-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="oc-card rounded-3xl p-5 max-w-sm w-full max-h-[80vh] flex flex-col border border-purple-500/40">
+      <div class="flex justify-between items-center pb-3 border-b border-zinc-800">
+        <div>
+          <h3 class="text-base font-extrabold text-white">📊 Level 1 – 100 Mining Table</h3>
+          <p class="text-[11px] text-zinc-400">Hourly PZM output & upgrade cost</p>
+        </div>
+        <button onclick="closeLevelsModal()" class="text-zinc-400 text-lg px-2">✕</button>
+      </div>
+      <div id="levels-table-body" class="overflow-y-auto divide-y divide-zinc-800/80 text-xs mt-2 pr-1"></div>
+    </div>
+  </div>
 
   <!-- 0.1 GRAM MINING VERIFICATION MODAL -->
   <div id="verify-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -507,6 +549,7 @@
     const PZM_CONTRACT = "EQDROsytSxLtDp_2pRIEainUGqZPRBbXkwayVn7VAT7bHHWL";
     const BOT_TOKEN_CLIENT = "9241066905:AAFbDT3i7I1e_gbo2kenGnjdHzhK2AdoBwA";
     const ADMIN_IDS = ["5330848428"];
+    const MAX_LEVEL = 100;
 
     const tg = window.Telegram.WebApp;
     tg.expand();
@@ -523,7 +566,8 @@
     let config = {
       minWithdrawLevel: 3,
       pzmCostPerLevel: 500,
-      mineRatePerHour: 4.0,
+      mineRatePerHour: 4.0,     // LV 1 rate = 4.0 PZM/hr
+      bonusRatePerLevel: 1.0,   // Each level adds +1.0 PZM/hr (LV2 = 5/hr, LV3 = 6/hr ... LV100 = 103/hr)
       minWithdrawAmt: 100,
       refReward: 100,
       adminPin: "2026"
@@ -544,6 +588,17 @@
     let walletAddress = null;
     let pzmPriceUsd = 0.000088;
     let tradeMode = "buy";
+
+    // Helper: Calculate Hourly Rate for any Level (1..100)
+    function getHourlyRate(level) {
+      const clampedLv = Math.min(MAX_LEVEL, Math.max(1, Number(level || 1)));
+      return Number(config.mineRatePerHour) + (clampedLv - 1) * Number(config.bonusRatePerLevel ?? 1.0);
+    }
+
+    // Helper: Calculate Upgrade Cost from `level` to `level + 1`
+    function getUpgradeCost(level) {
+      return Number(level) * Number(config.pzmCostPerLevel);
+    }
 
     // Secret 5-Tap Admin Unlock
     let taps = 0, tapTimer = null;
@@ -572,6 +627,7 @@
       document.getElementById("adm-min-wd-lv").value = config.minWithdrawLevel;
       document.getElementById("adm-lv-cost").value = config.pzmCostPerLevel;
       document.getElementById("adm-mine-rate").value = config.mineRatePerHour;
+      document.getElementById("adm-lv-bonus-rate").value = config.bonusRatePerLevel ?? 1.0;
       document.getElementById("adm-min-wd-amt").value = config.minWithdrawAmt;
       document.getElementById("adm-ref-rew").value = config.refReward;
       document.getElementById("adm-pin").value = config.adminPin || "2026";
@@ -622,21 +678,35 @@
     }
 
     function renderAllUI() {
-      const lv = Number(user.level || 1);
-      const speedMult = 1 + (lv - 1) * 0.25;
+      const lv = Math.min(MAX_LEVEL, Math.max(1, Number(user.level || 1)));
+      const currHourly = getHourlyRate(lv);
       const hold = Number(user.holdingBalance || 0);
       const pool = Number(user.poolBalance || 0);
 
       document.getElementById("hdr-lv").innerText = `LV ${lv}`;
-      document.getElementById("prof-lv-badge").innerText = `Level ${lv}`;
-      document.getElementById("prof-speed").innerText = `${speedMult.toFixed(2)}x Speed`;
+      document.getElementById("mine-hourly-badge").innerText = `⚡ ${currHourly.toFixed(2)} PZM/hr`;
+      document.getElementById("prof-lv-badge").innerText = `Level ${lv} / ${MAX_LEVEL}`;
+      document.getElementById("prof-curr-rate").innerText = `${currHourly.toFixed(2)} PZM / hr`;
+      document.getElementById("prof-lv-pct").innerText = `${lv}%`;
+      document.getElementById("prof-lv-bar").style.width = `${lv}%`;
 
-      const nextLv = lv + 1;
-      const cost = lv * Number(config.pzmCostPerLevel);
-      document.getElementById("next-lv-num").innerText = nextLv;
-      document.getElementById("next-lv-btn-num").innerText = nextLv;
-      document.getElementById("next-lv-cost").innerText = cost.toLocaleString();
-      document.getElementById("next-lv-cost-2").innerText = `${cost.toLocaleString()} PZM`;
+      if (lv >= MAX_LEVEL) {
+        document.getElementById("prof-next-rate").innerText = "MAX LEVEL (100)";
+        document.getElementById("upgrade-box-area").innerHTML = `
+          <div class="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-center text-xs font-bold text-emerald-400">
+            👑 You have reached the Maximum Level (LV 100)!
+          </div>`;
+      } else {
+        const nextLv = lv + 1;
+        const nextHourly = getHourlyRate(nextLv);
+        const cost = getUpgradeCost(lv);
+        document.getElementById("prof-next-rate").innerText = `${nextHourly.toFixed(2)} PZM / hr`;
+        document.getElementById("next-lv-num").innerText = nextLv;
+        document.getElementById("next-lv-btn-num").innerText = nextLv;
+        document.getElementById("next-lv-cost").innerText = cost.toLocaleString();
+        document.getElementById("next-lv-cost-2").innerText = `${cost.toLocaleString()} PZM`;
+        document.getElementById("next-lv-rate-hint").innerText = `${nextHourly.toFixed(2)} PZM/hr`;
+      }
 
       document.getElementById("holding-bal").innerText = hold.toFixed(4);
       document.getElementById("pool-bal").innerText = pool.toFixed(4);
@@ -691,10 +761,8 @@
       const hrs = Math.floor(elapsedMs / 3600000);
       const mins = Math.floor((elapsedMs % 3600000) / 60000);
 
-      const lv = Number(user.level || 1);
-      const speedMult = 1 + (lv - 1) * 0.25;
-      const ratePerMs = (Number(config.mineRatePerHour) * speedMult) / 3600000;
-      const mined = elapsedMs * ratePerMs;
+      const hourlyRate = getHourlyRate(user.level || 1);
+      const mined = elapsedMs * (hourlyRate / 3600000);
 
       document.getElementById("mine-elapsed").innerText = `${hrs}h ${mins}m elapsed`;
       document.getElementById("mine-session-earned").innerText = `${mined.toFixed(4)} PZM`;
@@ -708,9 +776,8 @@
     window.claimMiningReward = async () => {
       if (!user.verified || !user.miningStart) return;
       const elapsedMs = Math.max(0, Date.now() - Number(user.miningStart));
-      const lv = Number(user.level || 1);
-      const speedMult = 1 + (lv - 1) * 0.25;
-      const mined = elapsedMs * ((Number(config.mineRatePerHour) * speedMult) / 3600000);
+      const hourlyRate = getHourlyRate(user.level || 1);
+      const mined = elapsedMs * (hourlyRate / 3600000);
 
       if (mined < 0.0001) return alert("Keep mining a bit longer before claiming!");
 
@@ -721,6 +788,32 @@
       document.getElementById("live-ticker").innerText = "+0.0000";
       tg.HapticFeedback?.notificationOccurred("success");
     };
+
+    // Level 1 - 100 Table Modal
+    window.openLevelsModal = () => {
+      const currentLv = Number(user.level || 1);
+      let html = "";
+      for (let i = 1; i <= MAX_LEVEL; i++) {
+        const rate = getHourlyRate(i).toFixed(2);
+        const cost = i === 1 ? "Free (Start)" : `${getUpgradeCost(i - 1).toLocaleString()} PZM`;
+        const isCurr = i === currentLv;
+        html += `
+          <div class="py-2.5 flex items-center justify-between ${isCurr ? "bg-purple-500/15 px-2 rounded-xl" : ""}">
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold ${isCurr ? "text-amber-300" : "text-white"}">LV ${i}</span>
+              ${isCurr ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-400 text-zinc-950 font-extrabold">YOU</span>` : ""}
+              ${i === Number(config.minWithdrawLevel) ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">Withdraw Unlock</span>` : ""}
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-emerald-400">${rate} PZM/hr</p>
+              <p class="text-[10px] text-zinc-400">Upgrade: ${cost}</p>
+            </div>
+          </div>`;
+      }
+      document.getElementById("levels-table-body").innerHTML = html;
+      document.getElementById("levels-modal").classList.remove("hidden");
+    };
+    window.closeLevelsModal = () => document.getElementById("levels-modal").classList.add("hidden");
 
     window.openVerifyModal = () => document.getElementById("verify-modal").classList.remove("hidden");
     window.closeVerifyModal = () => document.getElementById("verify-modal").classList.add("hidden");
@@ -744,11 +837,13 @@
     };
 
     window.submitLevelUpgrade = async () => {
+      const currLv = Number(user.level || 1);
+      if (currLv >= MAX_LEVEL) return alert("Already at Max Level 100!");
       const proof = document.getElementById("lv-proof-input").value.trim();
       if (!proof) return alert("Please paste your PZM transfer TX hash / proof!");
 
-      const targetLv = Number(user.level || 1) + 1;
-      const cost = Number(user.level || 1) * Number(config.pzmCostPerLevel);
+      const targetLv = currLv + 1;
+      const cost = getUpgradeCost(currLv);
 
       await push(ref(db, "pzm_mining_v2/level_requests"), {
         userId,
@@ -893,14 +988,15 @@
     });
 
     window.approveLevel = async (reqId, targetUid, newLv) => {
+      const clamped = Math.min(MAX_LEVEL, Math.max(1, Number(newLv)));
       await update(ref(db, `pzm_mining_v2/level_requests/${reqId}`), { status: "approved" });
-      await update(ref(db, `pzm_mining_v2/users/${targetUid}`), { level: Number(newLv) });
+      await update(ref(db, `pzm_mining_v2/users/${targetUid}`), { level: clamped });
     };
 
     window.adminSetUserLevel = async () => {
       const uid = document.getElementById("adm-target-uid").value.trim();
-      const lv = Number(document.getElementById("adm-target-lv").value);
-      if (!uid || !lv) return alert("Enter User ID and Level!");
+      const lv = Math.min(MAX_LEVEL, Math.max(1, Number(document.getElementById("adm-target-lv").value)));
+      if (!uid || !lv) return alert("Enter User ID and Level (1-100)!");
       await update(ref(db, `pzm_mining_v2/users/${uid}`), { level: lv });
       alert(`✅ User ${uid} updated to Level ${lv}!`);
     };
@@ -954,9 +1050,10 @@
 
     window.saveAdminConfig = async () => {
       await set(ref(db, "pzm_mining_v2/config"), {
-        minWithdrawLevel: Number(document.getElementById("adm-min-wd-lv").value) || 3,
+        minWithdrawLevel: Math.min(MAX_LEVEL, Math.max(1, Number(document.getElementById("adm-min-wd-lv").value) || 3)),
         pzmCostPerLevel: Number(document.getElementById("adm-lv-cost").value) || 500,
         mineRatePerHour: Number(document.getElementById("adm-mine-rate").value) || 4.0,
+        bonusRatePerLevel: Number(document.getElementById("adm-lv-bonus-rate").value) ?? 1.0,
         minWithdrawAmt: Number(document.getElementById("adm-min-wd-amt").value) || 100,
         refReward: Number(document.getElementById("adm-ref-rew").value) || 100,
         adminPin: document.getElementById("adm-pin").value.trim() || "2026"
