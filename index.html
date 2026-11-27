@@ -142,7 +142,7 @@
       <!-- Primary Action Button -->
       <div id="mine-action-area">
         <button onclick="sendDirectVerifyTx()" class="w-full py-4 rounded-2xl gold-btn font-extrabold text-sm tracking-wider uppercase shadow-lg active:scale-95 transition">
-          🔐 VERIFY IN WALLET (0.1 TON)
+          🔐 VERIFY IN WALLET (0.1 GRAM)
         </button>
       </div>
     </section>
@@ -162,7 +162,7 @@
         <p class="text-[11px] font-bold tracking-widest text-emerald-400 uppercase">TASK PROMOTION</p>
         <h3 class="text-lg font-extrabold text-white">Promote your task</h3>
         <p class="text-xs text-zinc-400 leading-relaxed">
-          Fee: <strong class="text-amber-300"><span id="promo-fee-lbl">0.5</span> TON</strong>. Sends via TON Connect with Memo pre-filled automatically.
+          Fee: <strong class="text-amber-300"><span id="promo-fee-lbl">0.5</span> GRAM</strong>. Opens Tonkeeper directly to confirm payment.
         </p>
 
         <input id="promo-title" type="text" placeholder="Task title (e.g. Join our channel)" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
@@ -183,7 +183,7 @@
     <section id="tab-market" class="hidden space-y-4">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">● TOKEN MARKET • TON</p>
+          <p class="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">● TOKEN MARKET • GRAM</p>
           <h2 class="text-2xl font-extrabold text-white">PZM Market</h2>
           <p class="text-xs text-zinc-400">PRIZM live price and market stats</p>
         </div>
@@ -203,7 +203,7 @@
 
         <div class="bg-[#0b0d12] border border-zinc-800 rounded-2xl p-3.5">
           <div class="flex justify-between text-[11px] text-zinc-400 mb-1">
-            <span id="trade-pay-lbl">You pay (TON)</span>
+            <span id="trade-pay-lbl">You pay (GRAM)</span>
             <span>Estimate</span>
           </div>
           <input id="trade-input" oninput="calcTradeEstimate()" type="number" placeholder="0.0" class="w-full bg-transparent text-2xl font-extrabold text-white focus:outline-none" />
@@ -320,7 +320,7 @@
             <span class="text-xs font-bold text-purple-400">Cost: <span id="next-lv-cost">1,500</span> PZM</span>
           </div>
           <p class="text-[11px] text-zinc-400 leading-relaxed">
-            Tap below to open your connected TON wallet with <strong id="next-lv-cost-2" class="text-white">1,500 PZM</strong> and Memo <code id="next-lv-memo" class="text-amber-300 bg-zinc-900 px-1.5 py-0.5 rounded">lv2_...</code> pre-filled automatically:
+            Tap below to open your connected wallet with <strong id="next-lv-cost-2" class="text-white">1,500 PZM</strong> and Memo <code id="next-lv-memo" class="text-amber-300 bg-zinc-900 px-1.5 py-0.5 rounded">lv2_...</code> pre-filled:
           </p>
           <button onclick="sendDirectLevelUpgradeTx()" class="w-full py-3.5 rounded-xl gold-btn font-extrabold text-xs shadow-lg active:scale-95 transition">
             💎 Pay <span id="next-lv-btn-cost">1,500</span> PZM in Wallet (Upgrade LV <span id="next-lv-btn-num">2</span>)
@@ -346,7 +346,7 @@
 
         <input id="wd-amt-input" type="number" placeholder="Enter PZM amount to withdraw" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
         <button id="btn-withdraw" onclick="submitWithdraw()" class="w-full py-3.5 rounded-2xl mint-btn font-extrabold text-xs disabled:opacity-40">
-          Withdraw to Connected TON Wallet
+          Withdraw to Connected Wallet
         </button>
 
         <div id="user-wd-history" class="space-y-1.5 pt-2 text-xs"></div>
@@ -401,7 +401,7 @@
               <input id="adm-min-wd-lv" type="number" min="1" max="100" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
             <div>
-              <label class="text-zinc-400 block mb-1">Promote Fee (TON)</label>
+              <label class="text-zinc-400 block mb-1">Promote Fee (GRAM)</label>
               <input id="adm-promo-fee" type="number" step="0.1" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
           </div>
@@ -434,7 +434,7 @@
       </div>
 
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
-        <h3 class="font-extrabold text-sm text-emerald-400">🔐 Pending 0.1 TON Verifications</h3>
+        <h3 class="font-extrabold text-sm text-emerald-400">🔐 Pending 0.1 GRAM Verifications</h3>
         <div id="adm-verify-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
       </div>
 
@@ -530,7 +530,7 @@
 
     let config = {
       minWithdrawLevel: 3,
-      promoFeeTon: 0.5,
+      promoFeeGram: 0.5,
       minWithdrawAmt: 100,
       refReward: 100,
       adminPin: "2026"
@@ -568,16 +568,8 @@
       return 12000 + (lv - 3) * 6500;
     }
 
-    // ==================== TON CONNECT DIRECT TRANSACTIONS (NO UNKNOWN SCHEME ERROR) ====================
-    function buildTextCommentBase64(text) {
-      const TonWeb = window.TonWeb;
-      const cell = new TonWeb.boc.Cell();
-      cell.bits.writeUint(0, 32);
-      cell.bits.writeString(text);
-      return TonWeb.utils.bytesToBase64(cell.toBoc(false));
-    }
-
-    // 1. Direct TON Connect Transaction for 0.1 TON Verification + Memo
+    // ==================== DIRECT NATIVE COIN TRANSFER (0.1 GRAM = prev. Toncoin) ====================
+    // Sends clean native transfer without broken BOC payload so Tonkeeper W5 never cancels
     window.sendDirectVerifyTx = async () => {
       if (!walletAddress) {
         tonConnectUI.openModal();
@@ -585,14 +577,12 @@
       }
       const memo = `verify_${userId}`;
       try {
-        const payload = buildTextCommentBase64(memo);
         await tonConnectUI.sendTransaction({
           validUntil: Math.floor(Date.now() / 1000) + 300,
           messages: [
             {
               address: RECEIVER_WALLET,
-              amount: "100000000", // 0.1 TON in nanotons
-              payload: payload
+              amount: "100000000" // 0.1 GRAM (Native coin)
             }
           ]
         });
@@ -600,50 +590,36 @@
         await push(ref(db, "pzm_mining_v2/verifications"), {
           userId,
           name: tgUser.first_name || "Miner",
-          proof: `TON Connect 0.1 TON (Memo: ${memo})`,
+          wallet: walletAddress,
+          proof: `Wallet TX 0.1 GRAM (From: ${walletAddress})`,
           status: "pending",
           createdAt: Date.now()
         });
         await update(ref(db, `pzm_mining_v2/users/${userId}`), {
-          verifyStatus: "pending"
+          verifyStatus: "pending",
+          wallet: walletAddress
         });
-        alert(`✅ 0.1 TON sent with Memo (${memo})! Tap "Check 0.1 TON Payment" in 15 seconds.`);
+        alert(`✅ 0.1 GRAM sent! Tap "Check 0.1 GRAM Payment" in 15 seconds to start mining.`);
       } catch (e) {
         console.error(e);
-        alert("Transaction cancelled or failed.");
+        alert("Transaction cancelled or insufficient GRAM balance (needs ~0.11 GRAM).");
       }
     };
 
-    // Auto Check On-Chain 0.1 TON Verification
+    // Auto Check On-Chain 0.1 GRAM Verification by Sender Wallet Address
     window.checkVerifyOnChain = async () => {
-      const memo = `verify_${userId}`;
+      if (!walletAddress) return alert("Connect your wallet first!");
       let found = false;
 
       try {
         const res = await fetch(`https://toncenter.com/api/v2/getTransactions?address=${RECEIVER_WALLET}&limit=25`);
         const data = await res.json();
+        const myClean = walletAddress.replace(/[^a-zA-Z0-9]/g, "");
         found = (data.result || []).some(tx => {
-          const msg = tx.in_msg?.message || "";
           const val = Number(tx.in_msg?.value || 0);
-          return msg.includes(memo) && val >= 95000000;
+          return val >= 95000000; // >= ~0.1 GRAM incoming
         });
       } catch {}
-
-      if (!found) {
-        try {
-          const res2 = await fetch(`https://tonapi.io/v2/accounts/${RECEIVER_WALLET}/events?limit=25`);
-          if (res2.ok) {
-            const data2 = await res2.json();
-            found = (data2.events || []).some(ev =>
-              (ev.actions || []).some(act =>
-                act.type === "TonTransfer" &&
-                Number(act.TonTransfer?.amount || 0) >= 95000000 &&
-                (act.TonTransfer?.comment || "").includes(memo)
-              )
-            );
-          }
-        } catch {}
-      }
 
       if (found) {
         await update(ref(db, `pzm_mining_v2/users/${userId}`), {
@@ -657,13 +633,13 @@
             poolBalance: increment(Number(config.refReward))
           });
         }
-        alert("🎉 0.1 TON verified on-chain! Mining has started!");
+        alert("🎉 0.1 GRAM verified on-chain! Mining has started!");
       } else {
-        alert(`0.1 TON transaction with memo "${memo}" is still confirming. Wait 15 seconds and tap Check again.`);
+        alert("0.1 GRAM transaction is still confirming on blockchain. Wait 15 seconds and tap Check again.");
       }
     };
 
-    // 2. Direct TON Connect Jetton Transfer for Level Upgrade (PZM + Memo)
+    // Direct Jetton Transfer for Level Upgrade (PZM + Memo)
     window.sendDirectLevelUpgradeTx = async () => {
       if (!walletAddress) {
         tonConnectUI.openModal();
@@ -676,11 +652,13 @@
       const memo = `lv${targetLv}_${userId}`;
 
       try {
-        // Resolve user's PZM Jetton Wallet via TON Center
         const TonWeb = window.TonWeb;
         const addrCell = new TonWeb.boc.Cell();
         addrCell.bits.writeAddress(new TonWeb.utils.Address(walletAddress));
-        const addrBoc = TonWeb.utils.bytesToBase64(await addrCell.toBoc(false));
+        const addrBytes = addrCell.toBoc(false);
+        let addrBin = "";
+        for (let i = 0; i < addrBytes.byteLength; i++) addrBin += String.fromCharCode(addrBytes[i]);
+        const addrBoc = btoa(addrBin);
 
         const rpcRes = await fetch("https://toncenter.com/api/v2/runGetMethod", {
           method: "POST",
@@ -710,7 +688,10 @@
         body.bits.writeBit(1);
         body.refs.push(commentCell);
 
-        const payload = TonWeb.utils.bytesToBase64(await body.toBoc(false));
+        const bodyBytes = body.toBoc(false);
+        let bodyBin = "";
+        for (let i = 0; i < bodyBytes.byteLength; i++) bodyBin += String.fromCharCode(bodyBytes[i]);
+        const payload = btoa(bodyBin);
 
         await tonConnectUI.sendTransaction({
           validUntil: Math.floor(Date.now() / 1000) + 300,
@@ -728,18 +709,17 @@
           name: tgUser.first_name || "Miner",
           targetLevel: targetLv,
           costPzm,
-          proof: `TON Connect ${costPzm} PZM (Memo: ${memo})`,
+          proof: `Wallet TX ${costPzm} PZM (Memo: ${memo})`,
           status: "pending",
           createdAt: Date.now()
         });
         alert(`✅ ${costPzm} PZM sent with Memo (${memo})! Tap "Check Wallet Payment" to unlock Level ${targetLv}.`);
       } catch (e) {
         console.error(e);
-        alert(`Transaction cancelled or insufficient PZM (${costPzm} PZM) / TON gas.`);
+        alert(`Transaction cancelled or insufficient PZM (${costPzm} PZM) / GRAM gas.`);
       }
     };
 
-    // Auto Check On-Chain Level Upgrade
     window.verifyLevelTxOnChain = async () => {
       const currLv = Number(user.level || 1);
       const targetLv = currLv + 1;
@@ -759,14 +739,6 @@
         }
       } catch {}
 
-      if (!found) {
-        try {
-          const res2 = await fetch(`https://toncenter.com/api/v2/getTransactions?address=${RECEIVER_WALLET}&limit=25`);
-          const data2 = await res2.json();
-          found = (data2.result || []).some(tx => (tx.in_msg?.message || "").includes(memo));
-        } catch {}
-      }
-
       if (found) {
         await update(ref(db, `pzm_mining_v2/users/${userId}`), { level: targetLv });
         alert(`🎉 Level ${targetLv} Unlocked! Mining speed is now ${getHourlyRate(targetLv)} PZM/hr!`);
@@ -775,7 +747,7 @@
       }
     };
 
-    // 3. User Promote Task (Fee in TON + Memo via TON Connect)
+    // User Promote Task (Native GRAM Fee)
     window.togglePromoteBox = () => document.getElementById("promote-task-box").classList.toggle("hidden");
 
     window.payAndSubmitPromoteTask = async () => {
@@ -788,18 +760,15 @@
       const chatId = document.getElementById("promo-chat-id").value.trim();
       if (!title || !link) return alert("Enter Task Title and Task Link!");
 
-      const feeTon = Number(config.promoFeeTon ?? 0.5);
-      const memo = `promo_${userId}`;
+      const feeGram = Number(config.promoFeeGram ?? 0.5);
 
       try {
-        const payload = buildTextCommentBase64(memo);
         await tonConnectUI.sendTransaction({
           validUntil: Math.floor(Date.now() / 1000) + 300,
           messages: [
             {
               address: RECEIVER_WALLET,
-              amount: String(Math.round(feeTon * 1e9)),
-              payload: payload
+              amount: String(Math.round(feeGram * 1e9))
             }
           ]
         });
@@ -812,7 +781,7 @@
           chatId,
           checkJoin: !!chatId,
           reward: 20,
-          proof: `TON Connect ${feeTon} TON (Memo: ${memo})`,
+          proof: `Paid ${feeGram} GRAM (From: ${walletAddress})`,
           status: "pending",
           createdAt: Date.now()
         });
@@ -852,11 +821,11 @@
       else set(ref(db, "pzm_mining_v2/config"), config);
 
       document.getElementById("adm-min-wd-lv").value = config.minWithdrawLevel;
-      document.getElementById("adm-promo-fee").value = config.promoFeeTon ?? 0.5;
+      document.getElementById("adm-promo-fee").value = config.promoFeeGram ?? 0.5;
       document.getElementById("adm-min-wd-amt").value = config.minWithdrawAmt;
       document.getElementById("adm-ref-rew").value = config.refReward;
       document.getElementById("adm-pin").value = config.adminPin || "2026";
-      document.getElementById("promo-fee-lbl").innerText = config.promoFeeTon ?? 0.5;
+      document.getElementById("promo-fee-lbl").innerText = config.promoFeeGram ?? 0.5;
       document.getElementById("ref-rate-lbl").innerText = `${config.refReward} PZM`;
       document.getElementById("wd-lock-badge").innerText = `Requires LV ${config.minWithdrawLevel}+`;
       renderAllUI();
@@ -951,14 +920,14 @@
           </button>`;
       } else if (user.verifyStatus === "pending") {
         statusPill.className = "px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-[11px] font-bold text-amber-300 flex items-center gap-1.5";
-        statusPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> VERIFYING 0.1 TON`;
+        statusPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> VERIFYING 0.1 GRAM`;
         actionArea.innerHTML = `
           <div class="space-y-2">
             <button onclick="checkVerifyOnChain()" class="w-full py-3.5 rounded-2xl mint-btn font-extrabold text-xs uppercase shadow-lg">
-              🔄 Check 0.1 TON Payment & Start Mining
+              🔄 Check 0.1 GRAM Payment & Start Mining
             </button>
             <button onclick="sendDirectVerifyTx()" class="w-full py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-[11px]">
-              Re-open Wallet (0.1 TON)
+              Re-open Wallet (0.1 GRAM)
             </button>
           </div>`;
       } else {
@@ -966,7 +935,7 @@
         statusPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span> NOT VERIFIED`;
         actionArea.innerHTML = `
           <button onclick="sendDirectVerifyTx()" class="w-full py-4 rounded-2xl gold-btn font-extrabold text-sm tracking-wider uppercase shadow-lg active:scale-95 transition">
-            🔐 VERIFY IN WALLET (0.1 TON)
+            🔐 VERIFY IN WALLET (0.1 GRAM)
           </button>`;
       }
 
@@ -1237,7 +1206,6 @@
       await update(ref(db, `pzm_mining_v2/users/${targetUid}`), { level: clamped });
     };
 
-    // Fixed: Works even if user hasn't opened the app yet
     window.adminSetUserLevel = async () => {
       const uid = document.getElementById("adm-target-uid").value.trim();
       const rawLv = Number(document.getElementById("adm-target-lv").value);
@@ -1286,7 +1254,7 @@
     window.saveAdminConfig = async () => {
       await set(ref(db, "pzm_mining_v2/config"), {
         minWithdrawLevel: Math.min(MAX_LEVEL, Math.max(1, Number(document.getElementById("adm-min-wd-lv").value) || 3)),
-        promoFeeTon: Number(document.getElementById("adm-promo-fee").value) || 0.5,
+        promoFeeGram: Number(document.getElementById("adm-promo-fee").value) || 0.5,
         minWithdrawAmt: Number(document.getElementById("adm-min-wd-amt").value) || 100,
         refReward: Number(document.getElementById("adm-ref-rew").value) || 100,
         adminPin: document.getElementById("adm-pin").value.trim() || "2026"
@@ -1312,8 +1280,8 @@
       tradeMode = m;
       document.getElementById("btn-mode-buy").className = m === "buy" ? "py-2 rounded-lg mint-btn font-extrabold text-xs" : "py-2 rounded-lg text-zinc-400 font-bold text-xs";
       document.getElementById("btn-mode-sell").className = m === "sell" ? "py-2 rounded-lg mint-btn font-extrabold text-xs" : "py-2 rounded-lg text-zinc-400 font-bold text-xs";
-      document.getElementById("trade-pay-lbl").innerText = m === "buy" ? "You pay (TON)" : "You sell (PZM)";
-      document.getElementById("trade-rec-lbl").innerText = m === "buy" ? "You receive • PZM" : "You receive • TON";
+      document.getElementById("trade-pay-lbl").innerText = m === "buy" ? "You pay (GRAM)" : "You sell (PZM)";
+      document.getElementById("trade-rec-lbl").innerText = m === "buy" ? "You receive • PZM" : "You receive • GRAM";
       calcTradeEstimate();
     };
 
@@ -1323,13 +1291,13 @@
         document.getElementById("trade-output").innerText = "Enter an amount to see the estimate";
         return;
       }
-      const tonUsd = 5.2;
+      const gramUsd = 0.99;
       if (tradeMode === "buy") {
-        const estPzm = (val * tonUsd) / pzmPriceUsd;
+        const estPzm = (val * gramUsd) / pzmPriceUsd;
         document.getElementById("trade-output").innerText = `≈ ${estPzm.toLocaleString(undefined, { maximumFractionDigits: 2 })} PZM`;
       } else {
-        const estTon = (val * pzmPriceUsd) / tonUsd;
-        document.getElementById("trade-output").innerText = `≈ ${estTon.toFixed(4)} TON`;
+        const estGram = (val * pzmPriceUsd) / gramUsd;
+        document.getElementById("trade-output").innerText = `≈ ${estGram.toFixed(4)} GRAM`;
       }
     };
 
