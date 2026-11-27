@@ -82,7 +82,7 @@
             </span>
           </div>
           <span id="mine-hourly-badge" class="px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/40 text-[11px] font-extrabold text-purple-300">
-            ⚡ 16.00 PZM/hr
+            ⚡ 16 PZM/hr
           </span>
         </div>
 
@@ -147,11 +147,33 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 2: TASKS (NO PROMOTE BOX) ==================== -->
+    <!-- ==================== TAB 2: TASKS (WITH + PROMOTE A TASK) ==================== -->
     <section id="tab-tasks" class="hidden space-y-4">
       <div class="text-center space-y-1">
         <h2 class="text-2xl font-extrabold text-white">Earn Rewards</h2>
-        <p class="text-xs text-zinc-400">Complete tasks to earn PZM directly into your Pool Wallet</p>
+        <p class="text-xs text-zinc-400">Rewards go directly to Pool Wallet</p>
+      </div>
+
+      <!-- + Promote a task button -->
+      <button onclick="togglePromoteBox()" class="w-full py-3.5 rounded-2xl mint-btn font-extrabold text-sm shadow-lg active:scale-95 transition">
+        + Promote a task
+      </button>
+
+      <!-- Promote Task Form (Direct Wallet Payment + Memo OR Manual Proof) -->
+      <div id="promote-task-box" class="hidden oc-card rounded-3xl p-4 space-y-3 border border-emerald-500/30">
+        <p class="text-[11px] font-bold tracking-widest text-emerald-400 uppercase">TASK PROMOTION</p>
+        <h3 class="text-lg font-extrabold text-white">Promote your task</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Fee: <strong class="text-amber-300"><span id="promo-fee-lbl">1.0</span> GRAM</strong> (or <strong class="text-white">500 PZM</strong>). Your task will appear live once approved by an admin.
+        </p>
+
+        <input id="promo-title" type="text" placeholder="Task title (e.g. Join our channel)" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
+        <input id="promo-link" type="text" placeholder="Task link (https://t.me/...)" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
+        <input id="promo-chat-id" type="text" placeholder="Channel @username (optional, if bot is admin)" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
+
+        <button onclick="payAndSubmitPromoteTask()" class="w-full py-3.5 rounded-xl mint-btn font-extrabold text-xs shadow-lg">
+          💎 Pay Fee in Wallet & Submit Task
+        </button>
       </div>
 
       <div id="tasks-list" class="space-y-3">
@@ -268,19 +290,17 @@
           </span>
         </div>
 
-        <!-- Hourly Mining Rate Comparison Box -->
         <div class="grid grid-cols-2 gap-2.5">
           <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800">
             <p class="text-[10px] text-zinc-400 uppercase">Current Rate</p>
-            <p id="prof-curr-rate" class="text-sm font-extrabold text-emerald-400 mt-0.5">16.00 PZM / hr</p>
+            <p id="prof-curr-rate" class="text-sm font-extrabold text-emerald-400 mt-0.5">16 PZM / hr</p>
           </div>
           <div class="bg-[#0b0d12] p-3 rounded-2xl border border-purple-500/30">
             <p class="text-[10px] text-zinc-400 uppercase">Next Level Rate</p>
-            <p id="prof-next-rate" class="text-sm font-extrabold text-purple-300 mt-0.5">20.00 PZM / hr</p>
+            <p id="prof-next-rate" class="text-sm font-extrabold text-purple-300 mt-0.5">20 PZM / hr</p>
           </div>
         </div>
 
-        <!-- Level 1-100 Progress Bar -->
         <div>
           <div class="flex justify-between text-[11px] text-zinc-400 mb-1">
             <span>Level Progress</span>
@@ -313,7 +333,7 @@
         </div>
       </div>
 
-      <!-- Withdraw Pool Wallet Card (Requires Lv 3+) -->
+      <!-- Withdraw Pool Wallet Card -->
       <div class="oc-card rounded-3xl p-4 space-y-3">
         <div class="flex justify-between items-center">
           <h3 class="text-base font-extrabold text-white">💸 Withdraw Pool PZM</h3>
@@ -343,7 +363,7 @@
           <span class="text-[10px] text-zinc-400">Admin ID: 5330848428</span>
         </div>
 
-        <!-- Direct User Level Setter (1 to 100) -->
+        <!-- Direct User Level Setter -->
         <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800 space-y-2 text-xs">
           <p class="font-bold text-amber-300">👑 Set User Level Directly (LV 1 – 100)</p>
           <div class="grid grid-cols-2 gap-2">
@@ -355,7 +375,7 @@
           </button>
         </div>
 
-        <!-- Add New Task with Admin Join Verification Toggle -->
+        <!-- Add New Task -->
         <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800 space-y-2.5 text-xs">
           <p class="font-bold text-emerald-400">➕ Add New Task</p>
           <input id="adm-task-title" type="text" placeholder="Task Title (e.g. Join PRIZM Channel)" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-white" />
@@ -383,20 +403,25 @@
               <input id="adm-min-wd-lv" type="number" min="1" max="100" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
             <div>
-              <label class="text-zinc-400 block mb-1">Min Withdraw PZM</label>
-              <input id="adm-min-wd-amt" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+              <label class="text-zinc-400 block mb-1">Promote Fee (GRAM)</label>
+              <input id="adm-promo-fee" type="number" step="0.1" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
+              <label class="text-zinc-400 block mb-1">Min Withdraw PZM</label>
+              <input id="adm-min-wd-amt" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+            </div>
+            <div>
               <label class="text-zinc-400 block mb-1">Referral Reward (PZM)</label>
               <input id="adm-ref-rew" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
-            <div>
-              <label class="text-zinc-400 block mb-1">Admin Secret PIN</label>
-              <input id="adm-pin" type="text" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
-            </div>
+          </div>
+
+          <div>
+            <label class="text-zinc-400 block mb-1">Admin Secret PIN</label>
+            <input id="adm-pin" type="text" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
           </div>
 
           <button onclick="saveAdminConfig()" class="w-full py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-white font-extrabold">
@@ -405,17 +430,25 @@
         </div>
       </div>
 
-      <!-- Pending Queues (Manual Fallback Approval) -->
+      <!-- Pending Promoted Tasks Queue -->
+      <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
+        <h3 class="font-extrabold text-sm text-purple-400">📢 Pending User Promoted Tasks</h3>
+        <div id="adm-promo-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
+      </div>
+
+      <!-- Pending Verifications -->
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
         <h3 class="font-extrabold text-sm text-emerald-400">🔐 Pending 0.1 GRAM Verifications</h3>
         <div id="adm-verify-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
       </div>
 
+      <!-- Pending Level Upgrades -->
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
         <h3 class="font-extrabold text-sm text-amber-400">⬆️ Pending Level Upgrades</h3>
         <div id="adm-lv-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
       </div>
 
+      <!-- Pending Withdrawals -->
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
         <h3 class="font-extrabold text-sm text-rose-400">💸 Pending Withdrawals</h3>
         <div id="adm-wd-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
@@ -485,7 +518,6 @@
 
     const RECEIVER_WALLET = "UQBgIJ-WwfvyRgpAb58MXYYA37CvJ-MO55Kc_vH_tJmC8Ugy";
     const PZM_CONTRACT = "EQDROsytSxLtDp_2pRIEainUGqZPRBbXkwayVn7VAT7bHHWL";
-    const GRAM_CONTRACT = "EQC47093oX5Xhb0xuk2lCr2RhS8rj-vul61u4W2UH5ORmG_O";
     const BOT_TOKEN_CLIENT = "9241066905:AAFbDT3i7I1e_gbo2kenGnjdHzhK2AdoBwA";
     const ADMIN_IDS = ["5330848428"];
     const MAX_LEVEL = 100;
@@ -504,6 +536,7 @@
 
     let config = {
       minWithdrawLevel: 3,
+      promoFeeGram: 1.0,
       minWithdrawAmt: 100,
       refReward: 100,
       adminPin: "2026"
@@ -522,22 +555,20 @@
     };
 
     let walletAddress = null;
+    let detectedGramJetton = null; // Stores exact { walletAddress, decimals, masterAddress, balance }
+    let detectedPzmJetton = null;
     let pzmPriceUsd = 0.000088;
     let tradeMode = "buy";
 
     // ==================== LEVEL 1 TO 100 RATES & COSTS ====================
-    // LV 1 = 16, LV 2 = 20, LV 3 = 25, LV 4 = 31, LV 5 = 38 ...
     function getHourlyRate(level) {
       const lv = Math.min(MAX_LEVEL, Math.max(1, Number(level || 1)));
       if (lv === 1) return 16;
       if (lv === 2) return 20;
       if (lv === 3) return 25;
-      // Progressive curve from LV 4 to 100 (LV4=31, LV5=38, LV10=85, LV100=3000+)
       return Math.round(25 + (lv - 3) * 6 + Math.pow(lv - 3, 1.35) * 1.5);
     }
 
-    // Upgrade Cost from `level` to `level + 1`
-    // LV 1->2 = 1500, LV 2->3 = 7500, LV 3->4 = 12000, LV 4->5 = 18000 ...
     function getUpgradeCost(currentLevel) {
       const lv = Number(currentLevel || 1);
       if (lv === 1) return 1500;
@@ -546,39 +577,93 @@
       return 12000 + (lv - 3) * 6500;
     }
 
+    // ==================== SCAN USER WALLET JETTONS (FINDS EXACT GRAM & PZM) ====================
+    async function syncWalletJettons(ownerAddr) {
+      detectedGramJetton = null;
+      detectedPzmJetton = null;
+      try {
+        const res = await fetch(`https://tonapi.io/v2/accounts/${ownerAddr}/jettons?currencies=usd`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const balances = data.balances || [];
+
+        for (const item of balances) {
+          const sym = (item.jetton?.symbol || "").toUpperCase();
+          const master = item.jetton?.address || "";
+          const dec = item.jetton?.decimals ?? 9;
+          const humanBal = Number(item.balance) / Math.pow(10, dec);
+          const jWallet = item.wallet_address?.address;
+
+          // Match GRAM (Symbol GRAM and highest balance if multiple)
+          if (sym === "GRAM" && jWallet) {
+            if (!detectedGramJetton || humanBal > detectedGramJetton.balance) {
+              detectedGramJetton = {
+                walletAddress: jWallet,
+                decimals: dec,
+                masterAddress: master,
+                balance: humanBal
+              };
+            }
+          }
+
+          // Match PZM
+          if (sym === "PZM" && jWallet) {
+            detectedPzmJetton = {
+              walletAddress: jWallet,
+              decimals: dec,
+              masterAddress: master,
+              balance: humanBal
+            };
+          }
+        }
+
+        // Also explicitly check PZM_CONTRACT
+        const pzmRes = await fetch(`https://tonapi.io/v2/accounts/${ownerAddr}/jettons/${PZM_CONTRACT}`);
+        if (pzmRes.ok) {
+          const pData = await pzmRes.json();
+          const dec = pData.jetton?.decimals ?? 9;
+          const pBal = Number(pData.balance) / Math.pow(10, dec);
+          detectedPzmJetton = {
+            walletAddress: pData.wallet_address?.address,
+            decimals: dec,
+            masterAddress: PZM_CONTRACT,
+            balance: pBal
+          };
+          await update(ref(db, `pzm_mining_v2/users/${userId}`), {
+            wallet: ownerAddr,
+            holdingBalance: pBal
+          });
+        }
+      } catch (e) {
+        console.error("Jetton scan error:", e);
+      }
+    }
+
     // ==================== TON JETTON TRANSFER BOC BUILDER (WITH MEMO) ====================
     async function buildJettonTransferPayload(amountTokens, decimals, receiverAddr, memoText) {
       const TonWeb = window.TonWeb;
       const Cell = TonWeb.boc.Cell;
       const Address = TonWeb.utils.Address;
 
-      // Build forward payload with text comment (memo)
       const commentCell = new Cell();
-      commentCell.bits.writeUint(0, 32); // text comment op-code 0x00000000
+      commentCell.bits.writeUint(0, 32);
       commentCell.bits.writeString(memoText);
 
       const amountNano = BigInt(Math.round(amountTokens * Math.pow(10, decimals)));
 
       const body = new Cell();
-      body.bits.writeUint(0xf8a7ea5, 32); // Jetton transfer op-code
-      body.bits.writeUint(0, 64);         // query_id
-      body.bits.writeCoins(amountNano);   // jetton amount
-      body.bits.writeAddress(new Address(receiverAddr)); // destination
-      body.bits.writeAddress(new Address(walletAddress)); // response_destination
-      body.bits.writeBit(0);              // no custom_payload
-      body.bits.writeCoins(TonWeb.utils.toNano("0.01")); // forward_ton_amount
-      body.bits.writeBit(1);              // forward_payload in ref
+      body.bits.writeUint(0xf8a7ea5, 32);
+      body.bits.writeUint(0, 64);
+      body.bits.writeCoins(amountNano);
+      body.bits.writeAddress(new Address(receiverAddr));
+      body.bits.writeAddress(new Address(walletAddress));
+      body.bits.writeBit(0);
+      body.bits.writeCoins(TonWeb.utils.toNano("0.01"));
+      body.bits.writeBit(1);
       body.refs.push(commentCell);
 
       const bocBytes = await body.toBoc(false);
       return TonWeb.utils.bytesToBase64(bocBytes);
-    }
-
-    async function getUserJettonWalletAddress(ownerAddr, jettonMasterAddr) {
-      const res = await fetch(`https://tonapi.io/v2/accounts/${ownerAddr}/jettons/${jettonMasterAddr}`);
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data?.wallet_address?.address || null;
     }
 
     // Direct Wallet Transaction for 0.1 GRAM Verification
@@ -587,19 +672,22 @@
         tonConnectUI.openModal();
         return alert("Please connect your TON Wallet first!");
       }
+      if (!detectedGramJetton) {
+        await syncWalletJettons(walletAddress);
+      }
+      if (!detectedGramJetton || detectedGramJetton.balance < 0.1) {
+        return alert("Could not detect at least 0.1 GRAM in your connected wallet. Make sure you connected the wallet holding GRAM!");
+      }
+
       const memo = `verify_${userId}`;
       try {
-        const userGramWallet = await getUserJettonWalletAddress(walletAddress, GRAM_CONTRACT);
-        if (!userGramWallet) {
-          return alert("You need at least 0.1 GRAM in your connected wallet to verify!");
-        }
-        const payloadBoc = await buildJettonTransferPayload(0.1, 9, RECEIVER_WALLET, memo);
+        const payloadBoc = await buildJettonTransferPayload(0.1, detectedGramJetton.decimals, RECEIVER_WALLET, memo);
         await tonConnectUI.sendTransaction({
           validUntil: Math.floor(Date.now() / 1000) + 300,
           messages: [
             {
-              address: userGramWallet,
-              amount: "50000000", // 0.05 TON gas fee
+              address: detectedGramJetton.walletAddress,
+              amount: "50000000", // 0.05 TON gas
               payload: payloadBoc
             }
           ]
@@ -608,30 +696,31 @@
         await push(ref(db, "pzm_mining_v2/verifications"), {
           userId,
           name: tgUser.first_name || "Miner",
-          proof: `Wallet TX (Memo: ${memo})`,
+          proof: `Wallet TX 0.1 GRAM (Memo: ${memo})`,
           status: "pending",
           createdAt: Date.now()
         });
         await update(ref(db, `pzm_mining_v2/users/${userId}`), {
           verifyStatus: "pending"
         });
-        alert(`✅ 0.1 GRAM sent with Memo (${memo})! Click "Check Payment" in a few seconds.`);
+        alert(`✅ 0.1 GRAM sent with Memo (${memo})! Tap "Check 0.1 GRAM Payment" in a few seconds.`);
       } catch (e) {
         console.error(e);
-        alert("Transaction cancelled or failed. Make sure you have 0.1 GRAM + 0.05 TON for gas.");
+        alert("Transaction cancelled or failed. Make sure you also have ~0.05 TON for network gas.");
       }
     };
 
-    // Auto Check On-Chain Verification (TonAPI Events)
+    // Auto Check On-Chain Verification
     window.checkVerifyOnChain = async () => {
       try {
         const memo = `verify_${userId}`;
-        const res = await fetch(`https://tonapi.io/v2/accounts/${RECEIVER_WALLET}/jettons/${GRAM_CONTRACT}/history?limit=25`);
+        const res = await fetch(`https://tonapi.io/v2/accounts/${RECEIVER_WALLET}/events?limit=25`);
         const data = await res.json();
-        const found = (data.operations || []).some(op =>
-          op.operation === "transfer" &&
-          Number(op.amount) >= 100000000 && // >= 0.1 GRAM
-          (op.payload || "").includes(memo)
+        const found = (data.events || []).some(ev =>
+          (ev.actions || []).some(act =>
+            act.type === "JettonTransfer" &&
+            (act.JettonTransfer?.comment || "").includes(memo)
+          )
         );
         if (found) {
           await update(ref(db, `pzm_mining_v2/users/${userId}`), {
@@ -647,7 +736,7 @@
           }
           alert("🎉 Payment verified on-chain! Mining has started!");
         } else {
-          alert("Transaction still confirming on TON blockchain. Please wait 15 seconds and tap Check again.");
+          alert("Transaction still confirming on TON blockchain. Wait 15 seconds and tap Check again.");
         }
       } catch {
         alert("Could not reach TonAPI right now. Try again in a few seconds.");
@@ -660,24 +749,27 @@
         tonConnectUI.openModal();
         return alert("Please connect your TON Wallet first!");
       }
+      if (!detectedPzmJetton) {
+        await syncWalletJettons(walletAddress);
+      }
       const currLv = Number(user.level || 1);
       if (currLv >= MAX_LEVEL) return alert("Already at Max Level 100!");
       const targetLv = currLv + 1;
       const costPzm = getUpgradeCost(currLv);
       const memo = `lv${targetLv}_${userId}`;
 
+      if (!detectedPzmJetton || detectedPzmJetton.balance < costPzm) {
+        return alert(`You need ${costPzm.toLocaleString()} PZM in your wallet to upgrade to Level ${targetLv}!`);
+      }
+
       try {
-        const userPzmWallet = await getUserJettonWalletAddress(walletAddress, PZM_CONTRACT);
-        if (!userPzmWallet) {
-          return alert(`You don't have PZM in your wallet yet. Buy at least ${costPzm} PZM first!`);
-        }
-        const payloadBoc = await buildJettonTransferPayload(costPzm, 9, RECEIVER_WALLET, memo);
+        const payloadBoc = await buildJettonTransferPayload(costPzm, detectedPzmJetton.decimals, RECEIVER_WALLET, memo);
         await tonConnectUI.sendTransaction({
           validUntil: Math.floor(Date.now() / 1000) + 300,
           messages: [
             {
-              address: userPzmWallet,
-              amount: "50000000", // 0.05 TON gas
+              address: detectedPzmJetton.walletAddress,
+              amount: "50000000",
               payload: payloadBoc
             }
           ]
@@ -688,40 +780,97 @@
           name: tgUser.first_name || "Miner",
           targetLevel: targetLv,
           costPzm,
-          proof: `Wallet TX (Memo: ${memo})`,
+          proof: `Wallet TX ${costPzm} PZM (Memo: ${memo})`,
           status: "pending",
           createdAt: Date.now()
         });
         alert(`✅ ${costPzm} PZM sent with Memo (${memo})! Tap "Check Wallet Payment" to unlock Level ${targetLv}.`);
       } catch (e) {
         console.error(e);
-        alert("Transaction cancelled or insufficient PZM/TON balance.");
+        alert("Transaction cancelled or insufficient PZM/TON gas.");
       }
     };
 
-    // Auto Check On-Chain Level Upgrade Payment
+    // Auto Check On-Chain Level Upgrade
     window.verifyLevelTxOnChain = async () => {
       const currLv = Number(user.level || 1);
       const targetLv = currLv + 1;
-      const costPzm = getUpgradeCost(currLv);
       const memo = `lv${targetLv}_${userId}`;
       try {
-        const res = await fetch(`https://tonapi.io/v2/accounts/${RECEIVER_WALLET}/jettons/${PZM_CONTRACT}/history?limit=25`);
+        const res = await fetch(`https://tonapi.io/v2/accounts/${RECEIVER_WALLET}/events?limit=25`);
         const data = await res.json();
-        const minRaw = costPzm * 1e9 * 0.99; // 1% tolerance
-        const found = (data.operations || []).some(op =>
-          op.operation === "transfer" &&
-          Number(op.amount) >= minRaw &&
-          (op.payload || "").includes(memo)
+        const found = (data.events || []).some(ev =>
+          (ev.actions || []).some(act =>
+            act.type === "JettonTransfer" &&
+            (act.JettonTransfer?.comment || "").includes(memo)
+          )
         );
         if (found) {
           await update(ref(db, `pzm_mining_v2/users/${userId}`), { level: targetLv });
-          alert(`🎉 Level ${targetLv} Unlocked! Your mining speed is now ${getHourlyRate(targetLv)} PZM/hr!`);
+          alert(`🎉 Level ${targetLv} Unlocked! Mining speed is now ${getHourlyRate(targetLv)} PZM/hr!`);
         } else {
           alert(`Payment with memo "${memo}" not confirmed yet. Wait 15 seconds and check again.`);
         }
       } catch {
         alert("Network busy. Try again in a few seconds.");
+      }
+    };
+
+    // ==================== USER PROMOTE TASK (FEE IN WALLET + MEMO) ====================
+    window.togglePromoteBox = () => document.getElementById("promote-task-box").classList.toggle("hidden");
+
+    window.payAndSubmitPromoteTask = async () => {
+      const title = document.getElementById("promo-title").value.trim();
+      const link = document.getElementById("promo-link").value.trim();
+      const chatId = document.getElementById("promo-chat-id").value.trim();
+      if (!title || !link) return alert("Enter Task Title and Task Link!");
+
+      if (!walletAddress) {
+        tonConnectUI.openModal();
+        return alert("Please connect your TON Wallet to pay the promotion fee!");
+      }
+      if (!detectedGramJetton) await syncWalletJettons(walletAddress);
+
+      const feeGram = Number(config.promoFeeGram || 1.0);
+      if (!detectedGramJetton || detectedGramJetton.balance < feeGram) {
+        return alert(`You need ${feeGram} GRAM in your wallet to promote a task!`);
+      }
+
+      const memo = `promo_${userId}`;
+      try {
+        const payloadBoc = await buildJettonTransferPayload(feeGram, detectedGramJetton.decimals, RECEIVER_WALLET, memo);
+        await tonConnectUI.sendTransaction({
+          validUntil: Math.floor(Date.now() / 1000) + 300,
+          messages: [
+            {
+              address: detectedGramJetton.walletAddress,
+              amount: "50000000",
+              payload: payloadBoc
+            }
+          ]
+        });
+
+        await push(ref(db, "pzm_mining_v2/promo_requests"), {
+          userId,
+          name: tgUser.first_name || "User",
+          title,
+          link,
+          chatId,
+          checkJoin: !!chatId,
+          reward: 20,
+          proof: `Paid ${feeGram} GRAM (Memo: ${memo})`,
+          status: "pending",
+          createdAt: Date.now()
+        });
+
+        document.getElementById("promo-title").value = "";
+        document.getElementById("promo-link").value = "";
+        document.getElementById("promo-chat-id").value = "";
+        togglePromoteBox();
+        alert("✅ Fee paid & task submitted! It will go live once approved by an admin.");
+      } catch (e) {
+        console.error(e);
+        alert("Transaction cancelled or failed.");
       }
     };
 
@@ -750,9 +899,11 @@
       else set(ref(db, "pzm_mining_v2/config"), config);
 
       document.getElementById("adm-min-wd-lv").value = config.minWithdrawLevel;
+      document.getElementById("adm-promo-fee").value = config.promoFeeGram ?? 1.0;
       document.getElementById("adm-min-wd-amt").value = config.minWithdrawAmt;
       document.getElementById("adm-ref-rew").value = config.refReward;
       document.getElementById("adm-pin").value = config.adminPin || "2026";
+      document.getElementById("promo-fee-lbl").innerText = config.promoFeeGram ?? 1.0;
       document.getElementById("ref-rate-lbl").innerText = `${config.refReward} PZM`;
       document.getElementById("wd-lock-badge").innerText = `Requires LV ${config.minWithdrawLevel}+`;
       renderAllUI();
@@ -943,7 +1094,7 @@
     };
     window.closeLevelsModal = () => document.getElementById("levels-modal").classList.add("hidden");
 
-    // ==================== TASKS WITH OPTIONAL CHANNEL JOIN CHECK ====================
+    // Tasks Render & Join Verification
     onValue(ref(db, "pzm_mining_v2/tasks"), (snap) => {
       let tasks = snap.val();
       if (!tasks) {
@@ -984,7 +1135,6 @@
       if (!tSnap.exists()) return;
       const t = tSnap.val();
 
-      // If task requires Telegram Channel/Group Join verification (Bot is Admin)
       if (t.checkJoin && t.chatId) {
         if (!openedTasks[id]) {
           openedTasks[id] = true;
@@ -993,7 +1143,6 @@
           if (btn) btn.innerText = "Verify Join";
           return;
         }
-        // Check membership via Bot API
         try {
           const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN_CLIENT}/getChatMember?chat_id=${encodeURIComponent(t.chatId)}&user_id=${userId}`);
           const data = await res.json();
@@ -1007,7 +1156,6 @@
           return alert("Could not verify membership. Make sure the bot is an admin in that channel.");
         }
       } else {
-        // No join check needed — open link & grant reward immediately
         if (t.link && t.link.startsWith("http")) window.open(t.link, "_blank");
       }
 
@@ -1040,7 +1188,7 @@
       await remove(ref(db, `pzm_mining_v2/tasks/${id}`));
     };
 
-    // Withdraw Pool Wallet (Lv 3+ Required)
+    // Withdraw Pool Wallet
     window.submitWithdraw = async () => {
       const amt = Number(document.getElementById("wd-amt-input").value);
       if (Number(user.level || 1) < Number(config.minWithdrawLevel)) {
@@ -1066,6 +1214,33 @@
     };
 
     // Admin Queues
+    onValue(ref(db, "pzm_mining_v2/promo_requests"), (snap) => {
+      const pending = Object.entries(snap.val() || {}).filter(([, v]) => v.status === "pending");
+      document.getElementById("adm-promo-list").innerHTML = pending.length ? pending.map(([id, v]) => `
+        <div class="bg-[#0b0d12] p-3 rounded-xl border border-zinc-800 space-y-1.5">
+          <p class="font-bold text-white">${v.title} (by ${v.name})</p>
+          <p class="text-[11px] text-amber-300 truncate">${v.link} | ${v.proof}</p>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="approvePromo('${id}')" class="py-1.5 rounded-lg mint-btn font-bold">Publish Task ✓</button>
+            <button onclick="rejectItem('promo_requests', '${id}')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold">Reject</button>
+          </div>
+        </div>`).join("") : `<p class="text-zinc-500">None</p>`;
+    });
+
+    window.approvePromo = async (id) => {
+      const s = await get(ref(db, `pzm_mining_v2/promo_requests/${id}`));
+      if (!s.exists()) return;
+      const v = s.val();
+      await update(ref(db, `pzm_mining_v2/promo_requests/${id}`), { status: "approved" });
+      await push(ref(db, "pzm_mining_v2/tasks"), {
+        title: v.title,
+        link: v.link,
+        chatId: v.chatId || "",
+        checkJoin: !!v.checkJoin,
+        reward: Number(v.reward || 20)
+      });
+    };
+
     onValue(ref(db, "pzm_mining_v2/verifications"), (snap) => {
       const pending = Object.entries(snap.val() || {}).filter(([, v]) => v.status === "pending");
       document.getElementById("adm-verify-list").innerHTML = pending.length ? pending.map(([id, v]) => `
@@ -1155,6 +1330,7 @@
     window.saveAdminConfig = async () => {
       await set(ref(db, "pzm_mining_v2/config"), {
         minWithdrawLevel: Math.min(MAX_LEVEL, Math.max(1, Number(document.getElementById("adm-min-wd-lv").value) || 3)),
+        promoFeeGram: Number(document.getElementById("adm-promo-fee").value) || 1.0,
         minWithdrawAmt: Number(document.getElementById("adm-min-wd-amt").value) || 100,
         refReward: Number(document.getElementById("adm-ref-rew").value) || 100,
         adminPin: document.getElementById("adm-pin").value.trim() || "2026"
@@ -1202,7 +1378,7 @@
       }
     };
 
-    // TON Connect & Holding Wallet Sync
+    // TON Connect & Auto Jetton Scan
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
       buttonRootId: "ton-connect"
@@ -1211,16 +1387,11 @@
     tonConnectUI.onStatusChange(async (wallet) => {
       if (wallet && wallet.account) {
         walletAddress = wallet.account.address;
-        try {
-          const r = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons/${PZM_CONTRACT}`);
-          if (r.ok) {
-            const d = await r.json();
-            const bal = Number(d.balance) / Math.pow(10, d.jetton?.decimals ?? 9);
-            await update(ref(db, `pzm_mining_v2/users/${userId}`), { wallet: walletAddress, holdingBalance: bal });
-          }
-        } catch {}
+        await syncWalletJettons(walletAddress);
       } else {
         walletAddress = null;
+        detectedGramJetton = null;
+        detectedPzmJetton = null;
       }
       renderAllUI();
     });
