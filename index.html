@@ -3,299 +3,499 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Ownership Coin — Web3 Holder App</title>
+  <title>PZM MINING — PRIZM Protocol</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #09090b; color: #fafafa; }
-    .glass { background: rgba(24, 24, 27, 0.78); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .gold-glow { box-shadow: 0 0 28px rgba(245, 158, 11, 0.2); }
-    .tab-active { color: #fbbf24; border-top: 2px solid #fbbf24; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #07080a;
+      background-image: radial-gradient(circle at 50% 35%, rgba(168, 85, 247, 0.14), transparent 60%);
+      color: #ffffff;
+    }
+    .oc-card {
+      background: rgba(18, 20, 26, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+    }
+    .mint-btn {
+      background: #4ee6b5;
+      color: #06130e;
+    }
+    .gold-btn {
+      background: #f5c518;
+      color: #09090b;
+    }
+    .nav-active {
+      color: #f5c518;
+    }
+    @keyframes spinSlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .vortex-ring {
+      animation: spinSlow 16s linear infinite;
+    }
   </style>
 </head>
 <body class="min-h-screen pb-24 select-none overflow-x-hidden">
 
-  <!-- Top Header -->
-  <header class="sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-2.5" onclick="handleSecretAdminTap()">
-      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-zinc-950 font-extrabold text-base shadow-lg">
-        O
+  <!-- TOP HEADER (OC MINING STYLE) -->
+  <header class="px-4 pt-4 pb-2 flex items-center justify-between">
+    <div class="flex items-center gap-3" onclick="handleSecretAdminTap()">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 via-emerald-400 to-sky-400 p-[2px]">
+        <div class="w-full h-full rounded-full bg-[#07080a] flex items-center justify-center font-extrabold text-sm text-white">
+          P
+        </div>
       </div>
       <div>
         <div class="flex items-center gap-1.5">
-          <h1 id="ui-username" class="text-sm font-bold text-white truncate max-w-[110px]">Holder</h1>
-          <span id="ui-lv-pill" class="px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-amber-500/20 text-amber-400 border border-amber-500/40">
-            LV 1
-          </span>
+          <h1 class="text-base font-extrabold tracking-wide text-white">PZM MINING</h1>
+          <span id="hdr-lv" class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40">LV 1</span>
         </div>
-        <p class="text-[11px] text-zinc-400">Ownership Protocol</p>
+        <p class="text-[10px] tracking-[0.22em] text-zinc-400 uppercase">MINE • EARN • GROW</p>
       </div>
     </div>
 
     <div class="flex items-center gap-2">
-      <button id="btn-admin-open" onclick="switchTab('admin')" class="hidden px-2.5 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold">
+      <button id="btn-admin-top" onclick="switchTab('admin')" class="hidden px-2.5 py-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold">
         ⚙️ Admin
       </button>
       <div id="ton-connect"></div>
     </div>
   </header>
 
-  <!-- MAIN CONTAINER -->
-  <main class="max-w-md mx-auto p-4 space-y-4">
+  <!-- MAIN CONTENT -->
+  <main class="max-w-md mx-auto px-4 pt-2 space-y-4">
 
-    <!-- ==================== TAB 1: HOME ==================== -->
-    <section id="tab-home" class="space-y-4">
+    <!-- ==================== TAB 1: MINE ==================== -->
+    <section id="tab-mine" class="space-y-4">
 
-      <!-- Hero Balance Card -->
-      <div class="relative rounded-3xl p-5 bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/35 border border-amber-500/25 gold-glow overflow-hidden">
-        <div class="flex justify-between items-center">
-          <span class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ownership Balance</span>
-          <span id="ui-boost-badge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-            1.0x Boost
+      <!-- Session & Elapsed Pill -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-bold tracking-wider text-zinc-300">SESSION</span>
+          <span id="mine-status-pill" class="px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-[11px] font-bold text-rose-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-rose-400"></span> NOT VERIFIED
           </span>
         </div>
-
-        <div class="mt-2 flex items-baseline gap-2">
-          <span id="ui-points" class="text-4xl font-extrabold tracking-tight text-white">0</span>
-          <span class="text-sm font-bold text-amber-400">PTS</span>
+        <div class="inline-block px-3.5 py-1 rounded-full bg-zinc-900/90 border border-zinc-800 text-xs text-zinc-300">
+          <span id="mine-elapsed">0h 0m elapsed</span> • <span id="mine-session-earned" class="text-white font-semibold">0.0000 PZM</span> earned
         </div>
+      </div>
 
-        <!-- Level Progress Bar -->
-        <div class="mt-5 bg-zinc-950/80 p-3.5 rounded-2xl border border-zinc-800/80">
-          <div class="flex justify-between text-xs mb-1.5">
-            <span class="font-bold text-amber-400">Holder Level <span id="ui-level">1</span></span>
-            <span class="text-zinc-400"><span id="ui-token-bal">0</span> / <span id="ui-next-req">1,000</span> Tokens</span>
+      <!-- YOUR ASSETS -->
+      <div class="text-center pt-1">
+        <p class="text-[11px] tracking-[0.25em] text-zinc-400 uppercase">— YOUR ASSETS —</p>
+        <div class="mt-1 flex items-baseline justify-center gap-2">
+          <span id="total-assets" class="text-4xl font-extrabold tracking-tight text-white">0.0000</span>
+          <span class="text-sm font-bold text-zinc-400">PZM</span>
+        </div>
+      </div>
+
+      <!-- HOLDING WALLET & POOL WALLET ROWS -->
+      <div class="space-y-2.5">
+        <div class="oc-card rounded-2xl px-4 py-3.5 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full border border-purple-400/50 flex items-center justify-center text-[11px] text-purple-300 font-bold">P</span>
+            <span class="text-xs font-bold tracking-wider text-zinc-300 uppercase">HOLDING WALLET</span>
           </div>
-          <div class="w-full h-2.5 bg-zinc-800 rounded-full overflow-hidden">
-            <div id="ui-lv-bar" class="h-full bg-gradient-to-r from-amber-500 to-yellow-300 rounded-full transition-all duration-500" style="width: 5%"></div>
+          <span class="text-sm font-extrabold text-amber-300"><span id="holding-bal">0.0000</span> PZM ›</span>
+        </div>
+
+        <div class="oc-card rounded-2xl px-4 py-3.5 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 h-6 rounded-full border border-emerald-400/50 flex items-center justify-center text-[11px] text-emerald-300 font-bold">P</span>
+            <span class="text-xs font-bold tracking-wider text-zinc-300 uppercase">POOL WALLET</span>
           </div>
-          <p id="ui-lv-hint" class="text-[11px] text-zinc-400 mt-2">
-            Hold tokens in your wallet to level up & unlock withdrawals!
-          </p>
+          <span class="text-sm font-extrabold text-amber-300"><span id="pool-bal">0.0000</span> PZM ›</span>
         </div>
       </div>
 
-      <!-- Quick Action Buttons -->
-      <div class="grid grid-cols-2 gap-3">
-        <a href="https://dedust.io/swap/TON/EQA1R_LuQCLHlMgOo1S4G7Y7W1cd0FrAkbA10Zq7rddKxi9k" target="_blank"
-           class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-extrabold text-xs shadow-lg shadow-amber-500/20 active:scale-95 transition">
-          💎 Buy Token (Level Up)
-        </a>
-        <button onclick="switchTab('withdraw')"
-                class="flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl glass hover:bg-zinc-800 text-white font-bold text-xs active:scale-95 transition">
-          💸 Withdraw Rewards
-        </button>
-      </div>
+      <!-- Live Mining Ticker + Vortex Ring -->
+      <div class="text-center py-2 space-y-3">
+        <div id="live-ticker" class="text-3xl font-extrabold text-amber-300 tracking-wide">+0.0000</div>
 
-      <!-- Daily Check-in Card -->
-      <div class="glass rounded-2xl p-4 flex items-center justify-between">
-        <div>
-          <h3 class="font-bold text-sm text-white">🔥 Daily Holder Check-in</h3>
-          <p class="text-xs text-zinc-400 mt-0.5">Earn <span id="ui-daily-amt" class="text-amber-400 font-bold">+200</span> PTS × Level Boost</p>
+        <!-- Geometric Vortex Visual -->
+        <div class="relative w-44 h-44 mx-auto flex items-center justify-center">
+          <svg class="vortex-ring w-full h-full" viewBox="0 0 200 200">
+            <defs>
+              <linearGradient id="vortexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#a3e635" />
+                <stop offset="50%" stop-color="#38bdf8" />
+                <stop offset="100%" stop-color="#c084fc" />
+              </linearGradient>
+            </defs>
+            <g fill="none" stroke="url(#vortexGrad)" stroke-width="1.2" opacity="0.85">
+              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(0 100 100)" />
+              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(15 100 100)" />
+              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(30 100 100)" />
+              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(45 100 100)" />
+              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(60 100 100)" />
+              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(75 100 100)" />
+            </g>
+          </svg>
         </div>
-        <button id="btn-daily" onclick="claimDaily()"
-                class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs transition">
-          Claim
-        </button>
       </div>
 
-      <!-- Contract Info -->
-      <div class="glass rounded-2xl p-3.5 flex items-center justify-between text-xs">
-        <span class="text-zinc-400">Token CA:</span>
-        <button onclick="copyCA()" class="font-mono text-amber-400 hover:underline">
-          EQA1R_LuQ...rddKxi9k 📋
+      <!-- Primary Action Button (Verify 0.1 GRAM OR Claim Reward) -->
+      <div id="mine-action-area">
+        <button onclick="openVerifyModal()" class="w-full py-4 rounded-2xl gold-btn font-extrabold text-sm tracking-wider uppercase shadow-lg active:scale-95 transition">
+          🔐 VERIFY TO START MINING (0.1 GRAM)
         </button>
       </div>
     </section>
 
     <!-- ==================== TAB 2: TASKS ==================== -->
-    <section id="tab-tasks" class="hidden space-y-3">
-      <div class="flex justify-between items-center">
-        <h2 class="text-base font-extrabold text-white">🎯 Ownership Quests</h2>
-        <span class="text-xs text-amber-400 font-semibold">Level Boost Active</span>
+    <section id="tab-tasks" class="hidden space-y-4">
+      <div class="text-center space-y-1">
+        <h2 class="text-2xl font-extrabold text-white">Earn Rewards</h2>
+        <p class="text-xs text-zinc-400">Rewards go directly to Pool Wallet</p>
       </div>
-      <div id="tasks-container" class="space-y-2.5">
-        <p class="text-xs text-zinc-500 text-center py-6">Loading quests...</p>
-      </div>
-    </section>
 
-    <!-- ==================== TAB 3: FRIENDS ==================== -->
-    <section id="tab-friends" class="hidden space-y-4">
-      <div class="glass rounded-3xl p-5 text-center space-y-3">
-        <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl">
-          🤝
-        </div>
-        <h2 class="text-lg font-extrabold text-white">Invite Friends, Earn Together</h2>
-        <p class="text-xs text-zinc-400">
-          Get <span id="ui-ref-bonus" class="text-amber-400 font-bold">+500 PTS</span> for every friend who joins via your link!
+      <button onclick="togglePromoteBox()" class="w-full py-3.5 rounded-2xl mint-btn font-extrabold text-sm shadow-lg active:scale-95 transition">
+        + Promote a task
+      </button>
+
+      <!-- Promote Task Form (Hidden until clicked) -->
+      <div id="promote-task-box" class="hidden oc-card rounded-3xl p-4 space-y-3 border border-emerald-500/30">
+        <p class="text-[11px] font-bold tracking-widest text-emerald-400 uppercase">TASK PROMOTION</p>
+        <h3 class="text-lg font-extrabold text-white">Promote your task</h3>
+        <p class="text-xs text-zinc-400 leading-relaxed">
+          Your task will appear after your payment is approved by an administrator. Send <strong class="text-white">0.1 GRAM</strong> (or $2 USDT) to the official wallet below:
         </p>
 
-        <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-3.5 flex justify-around">
-          <div>
-            <p class="text-[11px] text-zinc-400">Total Invited</p>
-            <p id="ui-ref-count" class="text-xl font-extrabold text-white mt-0.5">0</p>
-          </div>
-          <div class="w-px bg-zinc-800"></div>
-          <div>
-            <p class="text-[11px] text-zinc-400">Referral Earnings</p>
-            <p id="ui-ref-earned" class="text-xl font-extrabold text-emerald-400 mt-0.5">0 PTS</p>
-          </div>
+        <div class="bg-[#0b0d12] border border-zinc-800 rounded-2xl p-3 space-y-2">
+          <p class="text-[11px] text-zinc-400">Official Receiver Wallet (TON):</p>
+          <p class="text-xs font-mono text-amber-300 break-all">UQBgIJ-WwfvyRgpAb58MXYYA37CvJ-MO55Kc_vH_tJmC8Ugy</p>
+          <button onclick="copyReceiverWallet()" class="px-3 py-1.5 rounded-xl bg-zinc-800 text-xs font-bold text-white">
+            📋 Copy address
+          </button>
         </div>
 
-        <button onclick="copyInviteLink()"
-                class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 text-zinc-950 font-extrabold text-sm shadow-lg active:scale-95 transition">
-          📋 Copy Personal Invite Link
+        <input id="promo-title" type="text" placeholder="Task title (e.g. Join our channel)" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
+        <input id="promo-link" type="text" placeholder="Task link (https://t.me/...)" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
+        <div>
+          <label class="text-[11px] text-zinc-400 block mb-1">Payment proof (Screenshot or TX Hash)</label>
+          <input id="promo-proof" type="text" placeholder="Paste TX Hash or Receipt Note" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
+        </div>
+
+        <button onclick="submitPromoteTask()" class="w-full py-3 rounded-xl mint-btn font-extrabold text-xs">
+          ⬆️ Submit task and payment proof
         </button>
+      </div>
+
+      <!-- Active Tasks List -->
+      <div id="tasks-list" class="space-y-3">
+        <p class="text-xs text-zinc-500 text-center py-6">Loading tasks...</p>
       </div>
     </section>
 
-    <!-- ==================== TAB 4: WITHDRAW ==================== -->
-    <section id="tab-withdraw" class="hidden space-y-4">
-      <div class="glass rounded-3xl p-5 space-y-4">
+    <!-- ==================== TAB 3: MARKET ==================== -->
+    <section id="tab-market" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">● TOKEN MARKET • TON</p>
+          <h2 class="text-2xl font-extrabold text-white">PZM Market</h2>
+          <p class="text-xs text-zinc-400">PRIZM live price and market stats</p>
+        </div>
+        <button onclick="fetchMarketData()" class="px-3.5 py-2 rounded-xl oc-card text-xs font-bold text-emerald-400">
+          ↻ Refresh
+        </button>
+      </div>
+
+      <!-- Trade Box -->
+      <div class="oc-card rounded-3xl p-4 space-y-3 border border-emerald-500/20">
+        <p class="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">DEDUST • LIVE ESTIMATE</p>
+        <h3 class="text-lg font-extrabold text-white">Trade PZM</h3>
+
+        <div class="grid grid-cols-2 gap-2 bg-[#0b0d12] p-1 rounded-xl">
+          <button id="btn-mode-buy" onclick="setTradeMode('buy')" class="py-2 rounded-lg mint-btn font-extrabold text-xs">Buy PZM</button>
+          <button id="btn-mode-sell" onclick="setTradeMode('sell')" class="py-2 rounded-lg text-zinc-400 font-bold text-xs">Sell PZM</button>
+        </div>
+
+        <div class="bg-[#0b0d12] border border-zinc-800 rounded-2xl p-3.5">
+          <div class="flex justify-between text-[11px] text-zinc-400 mb-1">
+            <span id="trade-pay-lbl">You pay (TON)</span>
+            <span>Estimate</span>
+          </div>
+          <input id="trade-input" oninput="calcTradeEstimate()" type="number" placeholder="0.0" class="w-full bg-transparent text-2xl font-extrabold text-white focus:outline-none" />
+        </div>
+
+        <div class="bg-[#0b0d12] border border-zinc-800 rounded-2xl p-3.5">
+          <p id="trade-rec-lbl" class="text-[11px] text-zinc-400">You receive • PZM</p>
+          <p id="trade-output" class="text-sm font-bold text-zinc-300 mt-1">Enter an amount to see the estimate</p>
+        </div>
+
+        <a href="https://dedust.io/swap/TON/EQDROsytSxLtDp_2pRIEainUGqZPRBbXkwayVn7VAT7bHHWL" target="_blank"
+           class="block w-full text-center py-3.5 rounded-2xl mint-btn font-extrabold text-sm">
+          Swap on DeDust.io
+        </a>
+      </div>
+
+      <!-- Live Market Stats Cards -->
+      <div class="space-y-2.5">
+        <div class="oc-card rounded-2xl p-4">
+          <p class="text-[10px] tracking-widest text-zinc-400 uppercase">PRICE • USD</p>
+          <p id="mkt-price" class="text-xl font-extrabold text-white mt-1">$0.000088</p>
+        </div>
+        <div class="oc-card rounded-2xl p-4">
+          <p class="text-[10px] tracking-widest text-zinc-400 uppercase">24H CHANGE</p>
+          <p id="mkt-change" class="text-xl font-extrabold text-emerald-400 mt-1">+1.51%</p>
+        </div>
+        <div class="oc-card rounded-2xl p-4">
+          <p class="text-[10px] tracking-widest text-zinc-400 uppercase">CONTRACT ADDRESS</p>
+          <p onclick="copyCA()" class="text-xs font-mono text-purple-400 mt-1 truncate cursor-pointer">EQDROsytSxLtDp_2pRIEainUGqZPRBbXkwayVn7VAT7bHHWL 📋</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: FRIENDS ==================== -->
+    <section id="tab-friends" class="hidden space-y-4">
+      <div class="text-center space-y-1">
+        <p class="text-[10px] font-bold tracking-widest text-amber-400 uppercase">PZM MINING REFERRAL</p>
+        <h2 class="text-2xl font-extrabold text-white">Friends</h2>
+        <p class="text-xs text-zinc-400">Invite friends and earn <span id="ref-rate-lbl" class="text-white font-bold">100 PZM</span> per verified friend.</p>
+      </div>
+
+      <div class="oc-card rounded-3xl p-4 space-y-3">
+        <p class="text-sm font-bold text-white">Your invite link</p>
+        <p id="my-ref-link" class="text-xs text-zinc-400 font-mono truncate bg-[#0b0d12] p-2.5 rounded-xl border border-zinc-800">Loading...</p>
+        <div class="grid grid-cols-2 gap-2.5">
+          <button onclick="copyInviteLink()" class="py-3 rounded-xl gold-btn font-extrabold text-xs">📋 Copy</button>
+          <button onclick="shareInviteLink()" class="py-3 rounded-xl bg-zinc-900 border border-zinc-700 text-white font-bold text-xs">🔗 Share</button>
+        </div>
+      </div>
+
+      <!-- 3 Stats Boxes -->
+      <div class="grid grid-cols-3 gap-2.5">
+        <div class="oc-card rounded-2xl p-3 text-center">
+          <p class="text-[10px] text-zinc-400">Total referrals</p>
+          <p id="stat-ref-total" class="text-xl font-extrabold text-white mt-1">0</p>
+        </div>
+        <div class="oc-card rounded-2xl p-3 text-center">
+          <p class="text-[10px] text-zinc-400">In progress</p>
+          <p id="stat-ref-pending" class="text-xl font-extrabold text-amber-400 mt-1">0</p>
+        </div>
+        <div class="oc-card rounded-2xl p-3 text-center">
+          <p class="text-[10px] text-zinc-400">Qualified</p>
+          <p id="stat-ref-qual" class="text-xl font-extrabold text-emerald-400 mt-1">0</p>
+        </div>
+      </div>
+
+      <div class="oc-card rounded-2xl p-4">
+        <p class="text-xs font-bold text-zinc-400">Referral rewards</p>
+        <p class="text-2xl font-extrabold text-emerald-400 mt-1"><span id="stat-ref-earned">0.00</span> PZM <span class="text-xs text-zinc-400 font-normal">earned</span></p>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: PROFILE (LEVEL UPGRADE + WITHDRAW) ==================== -->
+    <section id="tab-profile" class="hidden space-y-4">
+
+      <!-- User Level & Upgrade Card -->
+      <div class="oc-card rounded-3xl p-4 space-y-3 border border-purple-500/30">
         <div class="flex justify-between items-center">
-          <h2 class="text-base font-extrabold text-white">💸 Withdraw Tokens</h2>
-          <span id="wd-req-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
-            Requires LV 3
+          <div>
+            <p class="text-xs text-zinc-400">Account Status</p>
+            <h2 id="prof-name" class="text-lg font-extrabold text-white">Holder</h2>
+          </div>
+          <span id="prof-lv-badge" class="px-3 py-1 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/40 font-extrabold text-sm">
+            Level 1
           </span>
         </div>
 
-        <div id="wd-status-box" class="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2 text-xs">
-          <div class="flex justify-between">
-            <span class="text-zinc-400">1. Wallet Connected:</span>
-            <span id="chk-wallet" class="font-bold text-rose-400">❌ Not Connected</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-zinc-400">2. Holder Level (<span id="lbl-min-lv">Lv 3</span>+):</span>
-            <span id="chk-level" class="font-bold text-rose-400">❌ Current Lv 1</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-zinc-400">3. Min Balance (<span id="lbl-min-wd">5,000</span> PTS):</span>
-            <span id="chk-pts" class="font-bold text-rose-400">❌ 0 PTS</span>
-          </div>
+        <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800 flex justify-between items-center text-xs">
+          <span class="text-zinc-400">Mining Speed Multiplier:</span>
+          <span id="prof-speed" class="font-extrabold text-emerald-400">1.0x Speed</span>
         </div>
 
-        <div class="space-y-2">
-          <label class="text-xs text-zinc-400">Amount to Withdraw (PTS)</label>
-          <input id="wd-amount" type="number" placeholder="Enter PTS amount"
-                 class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-3 text-sm text-white focus:outline-none focus:border-amber-500" />
-        </div>
-
-        <button id="btn-submit-wd" onclick="submitWithdraw()"
-                class="w-full py-3.5 rounded-2xl bg-amber-500 text-zinc-950 font-extrabold text-sm disabled:opacity-40 transition">
-          Request Withdrawal
-        </button>
-      </div>
-
-      <div class="glass rounded-2xl p-4 space-y-2">
-        <h3 class="text-xs font-bold text-zinc-400 uppercase">Your Withdrawal History</h3>
-        <div id="wd-history" class="space-y-2 text-xs text-zinc-400">
-          No withdrawals yet.
-        </div>
-      </div>
-    </section>
-
-    <!-- ==================== TAB 5: ADMIN PANEL ==================== -->
-    <section id="tab-admin" class="hidden space-y-4">
-      <div class="glass rounded-3xl p-4 border border-rose-500/30 space-y-4">
-        <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
-          <h2 class="text-base font-extrabold text-rose-400">⚙️ Admin Control Panel</h2>
-          <span class="text-[11px] text-zinc-400">Live Firebase Sync</span>
-        </div>
-
-        <div class="space-y-3 text-xs">
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-zinc-400 block mb-1">Min Withdraw Level</label>
-              <input id="adm-min-lv" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
-            </div>
-            <div>
-              <label class="text-zinc-400 block mb-1">Tokens Per Level</label>
-              <input id="adm-tok-per-lv" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
-            </div>
+        <!-- Upgrade Level Section -->
+        <div class="pt-2 border-t border-zinc-800 space-y-2.5">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-extrabold text-white">⬆️ Upgrade to Level <span id="next-lv-num">2</span></h3>
+            <span class="text-xs font-bold text-purple-400">Cost: <span id="next-lv-cost">500</span> PZM</span>
           </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-zinc-400 block mb-1">Min Withdraw PTS</label>
-              <input id="adm-min-wd" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
-            </div>
-            <div>
-              <label class="text-zinc-400 block mb-1">Referral Bonus PTS</label>
-              <input id="adm-ref-bonus" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
-            </div>
+          <p class="text-[11px] text-zinc-400">
+            Send <strong id="next-lv-cost-2" class="text-white">500 PZM</strong> to the admin wallet below to upgrade your Level & unlock Lv <span id="cfg-min-wd-lv">3</span>+ withdrawals:
+          </p>
+          <div class="bg-[#0b0d12] p-2.5 rounded-xl border border-zinc-800 flex items-center justify-between gap-2">
+            <span class="text-[10px] font-mono text-amber-300 truncate">UQBgIJ-WwfvyRgpAb58MXYYA37CvJ-MO55Kc_vH_tJmC8Ugy</span>
+            <button onclick="copyReceiverWallet()" class="px-2.5 py-1 rounded-lg bg-zinc-800 text-[10px] font-bold shrink-0">Copy</button>
           </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-zinc-400 block mb-1">Daily Check-in PTS</label>
-              <input id="adm-daily-pts" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
-            </div>
-            <div>
-              <label class="text-zinc-400 block mb-1">Admin Secret PIN</label>
-              <input id="adm-pin" type="text" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
-            </div>
-          </div>
-
-          <button onclick="saveAdminSettings()"
-                  class="w-full py-3 rounded-xl bg-emerald-500 text-zinc-950 font-extrabold text-xs">
-            💾 Save System Settings
+          <input id="lv-proof-input" type="text" placeholder="Paste PZM Transfer TX Hash / Proof" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2.5 text-xs text-white" />
+          <button onclick="submitLevelUpgrade()" class="w-full py-3 rounded-xl gold-btn font-extrabold text-xs">
+            🚀 Request Level <span id="next-lv-btn-num">2</span> Upgrade
           </button>
         </div>
       </div>
 
-      <!-- Add New Task -->
-      <div class="glass rounded-3xl p-4 space-y-3 text-xs">
-        <h3 class="font-extrabold text-sm text-white">➕ Add New Quest / Task</h3>
-        <input id="adm-task-title" type="text" placeholder="Task Title (e.g. Join Telegram Channel)"
-               class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white" />
-        <div class="grid grid-cols-2 gap-2">
-          <input id="adm-task-reward" type="number" placeholder="Reward PTS (e.g. 500)"
-                 class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white" />
-          <input id="adm-task-url" type="text" placeholder="Link (https://t.me/...)"
-                 class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white" />
+      <!-- Withdraw Pool Wallet Card (Requires Lv 3+) -->
+      <div class="oc-card rounded-3xl p-4 space-y-3">
+        <div class="flex justify-between items-center">
+          <h3 class="text-base font-extrabold text-white">💸 Withdraw Pool PZM</h3>
+          <span id="wd-lock-badge" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-500/20 text-rose-400">
+            Requires LV 3+
+          </span>
         </div>
-        <button onclick="addNewTask()"
-                class="w-full py-2.5 rounded-xl bg-amber-500 text-zinc-950 font-extrabold">
-          + Add Task
+
+        <p class="text-xs text-zinc-400">
+          Available Pool Balance: <strong id="wd-avail-pool" class="text-white">0.0000 PZM</strong>
+        </p>
+
+        <input id="wd-amt-input" type="number" placeholder="Enter PZM amount to withdraw" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
+        <button id="btn-withdraw" onclick="submitWithdraw()" class="w-full py-3.5 rounded-2xl mint-btn font-extrabold text-xs disabled:opacity-40">
+          Withdraw to Connected TON Wallet
         </button>
+
+        <div id="user-wd-history" class="space-y-1.5 pt-2 text-xs"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 6: ADMIN PANEL ==================== -->
+    <section id="tab-admin" class="hidden space-y-4">
+      <div class="oc-card rounded-3xl p-4 border border-rose-500/40 space-y-4">
+        <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
+          <h2 class="text-base font-extrabold text-rose-400">⚙️ Admin Control Panel</h2>
+          <span class="text-[10px] text-zinc-400">PRIZM System</span>
+        </div>
+
+        <!-- Direct User Level Setter -->
+        <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800 space-y-2 text-xs">
+          <p class="font-bold text-amber-300">👑 Set User Level Directly</p>
+          <div class="grid grid-cols-2 gap-2">
+            <input id="adm-target-uid" type="text" placeholder="User Telegram ID" class="bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-white" />
+            <input id="adm-target-lv" type="number" placeholder="New Level (e.g. 3)" class="bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-white" />
+          </div>
+          <button onclick="adminSetUserLevel()" class="w-full py-2 rounded-xl gold-btn font-extrabold">
+            Update User Level
+          </button>
+        </div>
+
+        <!-- System Settings -->
+        <div class="space-y-2.5 text-xs">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-zinc-400 block mb-1">Min Withdraw Level</label>
+              <input id="adm-min-wd-lv" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+            </div>
+            <div>
+              <label class="text-zinc-400 block mb-1">PZM Cost Per Level</label>
+              <input id="adm-lv-cost" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-zinc-400 block mb-1">Mining Rate (PZM/hr)</label>
+              <input id="adm-mine-rate" type="number" step="0.1" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+            </div>
+            <div>
+              <label class="text-zinc-400 block mb-1">Min Withdraw PZM</label>
+              <input id="adm-min-wd-amt" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-zinc-400 block mb-1">Referral Reward (PZM)</label>
+              <input id="adm-ref-rew" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+            </div>
+            <div>
+              <label class="text-zinc-400 block mb-1">Admin Secret PIN</label>
+              <input id="adm-pin" type="text" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+            </div>
+          </div>
+
+          <button onclick="saveAdminConfig()" class="w-full py-2.5 rounded-xl mint-btn font-extrabold">
+            💾 Save All Settings
+          </button>
+        </div>
       </div>
 
-      <!-- Pending Withdraw Requests -->
-      <div class="glass rounded-3xl p-4 space-y-3 text-xs">
-        <h3 class="font-extrabold text-sm text-white">📥 Pending Withdrawals</h3>
-        <div id="adm-wd-list" class="space-y-2">
-          <p class="text-zinc-500">No pending requests.</p>
-        </div>
+      <!-- Queue 1: 0.1 GRAM Mining Verifications -->
+      <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
+        <h3 class="font-extrabold text-sm text-emerald-400">🔐 Pending 0.1 GRAM Verifications</h3>
+        <div id="adm-verify-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
+      </div>
+
+      <!-- Queue 2: Level Upgrade Requests -->
+      <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
+        <h3 class="font-extrabold text-sm text-amber-400">⬆️ Pending Level Upgrades</h3>
+        <div id="adm-lv-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
+      </div>
+
+      <!-- Queue 3: Promoted Tasks Approval -->
+      <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
+        <h3 class="font-extrabold text-sm text-purple-400">📢 Pending Promoted Tasks</h3>
+        <div id="adm-promo-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
+      </div>
+
+      <!-- Queue 4: Withdraw Requests -->
+      <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
+        <h3 class="font-extrabold text-sm text-rose-400">💸 Pending Withdrawals</h3>
+        <div id="adm-wd-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
       </div>
     </section>
 
   </main>
 
-  <!-- Bottom Navigation Bar -->
-  <nav class="fixed bottom-0 inset-x-0 z-30 glass border-t border-zinc-800">
-    <div class="max-w-md mx-auto grid grid-cols-4 text-center">
-      <button onclick="switchTab('home')" id="nav-home" class="py-3 flex flex-col items-center gap-1 tab-active">
-        <span class="text-lg">🏠</span>
-        <span class="text-[10px] font-bold">Home</span>
+  <!-- 0.1 GRAM MINING VERIFICATION MODAL -->
+  <div id="verify-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="oc-card rounded-3xl p-5 max-w-sm w-full space-y-4 border border-amber-400/30">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg font-extrabold text-white">🔐 Activate PZM Mining</h3>
+        <button onclick="closeVerifyModal()" class="text-zinc-400 text-lg">✕</button>
+      </div>
+      <p class="text-xs text-zinc-300 leading-relaxed">
+        To prevent bots and unlock unlimited mining, please send <strong class="text-amber-300">0.1 GRAM</strong> to our official verification wallet:
+      </p>
+
+      <div class="bg-[#0b0d12] border border-zinc-800 rounded-2xl p-3 space-y-2">
+        <p class="text-[10px] text-zinc-400 uppercase">Receiver Wallet Address (TON)</p>
+        <p class="text-xs font-mono text-amber-300 break-all">UQBgIJ-WwfvyRgpAb58MXYYA37CvJ-MO55Kc_vH_tJmC8Ugy</p>
+        <button onclick="copyReceiverWallet()" class="w-full py-2 rounded-xl bg-zinc-800 text-xs font-bold text-white">
+          📋 Copy Wallet Address
+        </button>
+      </div>
+
+      <input id="verify-proof-input" type="text" placeholder="Paste Transaction Hash / Receipt Note"
+             class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
+
+      <button onclick="submitMiningVerify()" class="w-full py-3.5 rounded-2xl mint-btn font-extrabold text-xs">
+        ✅ Submit Verification (0.1 GRAM)
       </button>
-      <button onclick="switchTab('tasks')" id="nav-tasks" class="py-3 flex flex-col items-center gap-1 text-zinc-400">
-        <span class="text-lg">🎯</span>
-        <span class="text-[10px] font-bold">Quests</span>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION (5 TABS LIKE OC MINING) -->
+  <nav class="fixed bottom-0 inset-x-0 z-30 bg-[#0b0d12]/95 backdrop-blur border-t border-zinc-800/90">
+    <div class="max-w-md mx-auto grid grid-cols-5 text-center py-2">
+      <button onclick="switchTab('mine')" id="nav-mine" class="flex flex-col items-center gap-1 nav-active">
+        <span class="text-lg">⛏️</span>
+        <span class="text-[10px] font-bold">Mine</span>
       </button>
-      <button onclick="switchTab('friends')" id="nav-friends" class="py-3 flex flex-col items-center gap-1 text-zinc-400">
+      <button onclick="switchTab('tasks')" id="nav-tasks" class="flex flex-col items-center gap-1 text-zinc-500">
+        <span class="text-lg">📋</span>
+        <span class="text-[10px] font-bold">Tasks</span>
+      </button>
+      <button onclick="switchTab('market')" id="nav-market" class="flex flex-col items-center gap-1 text-zinc-500">
+        <span class="text-lg">⚡</span>
+        <span class="text-[10px] font-bold">Market</span>
+      </button>
+      <button onclick="switchTab('friends')" id="nav-friends" class="flex flex-col items-center gap-1 text-zinc-500">
         <span class="text-lg">👥</span>
         <span class="text-[10px] font-bold">Friends</span>
       </button>
-      <button onclick="switchTab('withdraw')" id="nav-withdraw" class="py-3 flex flex-col items-center gap-1 text-zinc-400">
-        <span class="text-lg">💸</span>
-        <span class="text-[10px] font-bold">Withdraw</span>
+      <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-zinc-500">
+        <span class="text-lg">👤</span>
+        <span class="text-[10px] font-bold">Profile</span>
       </button>
     </div>
   </nav>
 
-  <!-- Firebase & App Logic -->
+  <!-- FIREBASE & APP LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, get, set, update, push, remove, onValue, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -314,87 +514,86 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // သင့် Telegram ID သိရင် ဒီထဲ ထည့်ထားနိုင်ပါတယ် (မထည့်ရသေးလည်း Header ကို ၅ ချက်နှိပ်ပြီး PIN: 2026 နဲ့ ဝင်လို့ရပါတယ်)
+    const RECEIVER_WALLET = "UQBgIJ-WwfvyRgpAb58MXYYA37CvJ-MO55Kc_vH_tJmC8Ugy";
+    const PZM_CONTRACT = "EQDROsytSxLtDp_2pRIEainUGqZPRBbXkwayVn7VAT7bHHWL";
     const ADMIN_IDS = [];
-    const JETTON_MASTER = "EQA1R_LuQCLHlMgOo1S4G7Y7W1cd0FrAkbA10Zq7rddKxi9k";
 
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    const tgUser = tg.initDataUnsafe?.user || { id: "demo_user_1", first_name: "Crypto Holder", username: "holder" };
+    const tgUser = tg.initDataUnsafe?.user || { id: "demo_user_1", first_name: "PZM Miner", username: "miner" };
     const userId = String(tgUser.id);
     const startParam = tg.initDataUnsafe?.start_param || "";
 
-    let isAdminUnlocked = ADMIN_IDS.includes(userId);
-    if (isAdminUnlocked) {
-      document.getElementById("btn-admin-open").classList.remove("hidden");
-    }
+    let isAdmin = ADMIN_IDS.includes(userId);
+    if (isAdmin) document.getElementById("btn-admin-top").classList.remove("hidden");
 
-    document.getElementById("ui-username").innerText = tgUser.first_name || "Holder";
+    document.getElementById("prof-name").innerText = `${tgUser.first_name || "Miner"} (ID: ${userId})`;
 
     let config = {
       minWithdrawLevel: 3,
-      tokensPerLevel: 1000,
-      minWithdrawPts: 5000,
-      refBonus: 500,
-      dailyReward: 200,
+      pzmCostPerLevel: 500,
+      mineRatePerHour: 4.0,
+      minWithdrawAmt: 100,
+      refReward: 100,
       adminPin: "2026"
     };
-    let userData = { points: 0, refCount: 0, completedTasks: {}, lastDaily: 0 };
+
+    let user = {
+      poolBalance: 0,
+      holdingBalance: 0,
+      level: 1,
+      verified: false,
+      verifyStatus: "unverified", // unverified | pending | verified
+      miningStart: 0,
+      refCount: 0,
+      qualifiedRefs: 0,
+      completedTasks: {}
+    };
+
     let walletAddress = null;
-    let tokenBalance = 0;
-    let currentLevel = 1;
+    let pzmPriceUsd = 0.000088;
+    let tradeMode = "buy";
 
     // Secret 5-Tap Admin Unlock
-    let tapCount = 0;
-    let tapTimer = null;
+    let taps = 0, tapTimer = null;
     window.handleSecretAdminTap = () => {
-      tapCount++;
+      taps++;
       clearTimeout(tapTimer);
-      tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
-      if (tapCount >= 5) {
-        tapCount = 0;
+      tapTimer = setTimeout(() => taps = 0, 2000);
+      if (taps >= 5) {
+        taps = 0;
         const pin = prompt("Enter Admin PIN:");
         if (pin === String(config.adminPin || "2026")) {
-          isAdminUnlocked = true;
-          document.getElementById("btn-admin-open").classList.remove("hidden");
+          isAdmin = true;
+          document.getElementById("btn-admin-top").classList.remove("hidden");
           switchTab("admin");
-          renderTasks();
         } else if (pin !== null) {
-          alert("Wrong PIN!");
+          alert("Invalid PIN");
         }
       }
     };
 
-    // 1. Load & Listen to Admin Config
-    onValue(ref(db, "ownership_v1/config"), (snap) => {
-      if (snap.exists()) {
-        config = { ...config, ...snap.val() };
-      } else {
-        set(ref(db, "ownership_v1/config"), config);
-      }
-      updateConfigUI();
-      recalcLevel();
+    // 1. Sync Config
+    onValue(ref(db, "pzm_mining_v2/config"), (snap) => {
+      if (snap.exists()) config = { ...config, ...snap.val() };
+      else set(ref(db, "pzm_mining_v2/config"), config);
+
+      document.getElementById("adm-min-wd-lv").value = config.minWithdrawLevel;
+      document.getElementById("adm-lv-cost").value = config.pzmCostPerLevel;
+      document.getElementById("adm-mine-rate").value = config.mineRatePerHour;
+      document.getElementById("adm-min-wd-amt").value = config.minWithdrawAmt;
+      document.getElementById("adm-ref-rew").value = config.refReward;
+      document.getElementById("adm-pin").value = config.adminPin || "2026";
+      document.getElementById("ref-rate-lbl").innerText = `${config.refReward} PZM`;
+      document.getElementById("cfg-min-wd-lv").innerText = config.minWithdrawLevel;
+      document.getElementById("wd-lock-badge").innerText = `Requires LV ${config.minWithdrawLevel}+`;
+      renderAllUI();
     });
 
-    function updateConfigUI() {
-      document.getElementById("ui-daily-amt").innerText = `+${config.dailyReward}`;
-      document.getElementById("ui-ref-bonus").innerText = `+${config.refBonus} PTS`;
-      document.getElementById("wd-req-badge").innerText = `Requires LV ${config.minWithdrawLevel}`;
-      document.getElementById("lbl-min-lv").innerText = `Lv ${config.minWithdrawLevel}`;
-      document.getElementById("lbl-min-wd").innerText = Number(config.minWithdrawPts).toLocaleString();
-
-      document.getElementById("adm-min-lv").value = config.minWithdrawLevel;
-      document.getElementById("adm-tok-per-lv").value = config.tokensPerLevel;
-      document.getElementById("adm-min-wd").value = config.minWithdrawPts;
-      document.getElementById("adm-ref-bonus").value = config.refBonus;
-      document.getElementById("adm-daily-pts").value = config.dailyReward;
-      document.getElementById("adm-pin").value = config.adminPin || "2026";
-    }
-
-    // 2. Initialize User & Handle Referral
+    // 2. Init & Sync User
     async function initUser() {
-      const uRef = ref(db, `ownership_v1/users/${userId}`);
+      const uRef = ref(db, `pzm_mining_v2/users/${userId}`);
       const snap = await get(uRef);
       if (!snap.exists()) {
         let invitedBy = null;
@@ -402,19 +601,23 @@
           const refId = startParam.replace("ref_", "");
           if (refId !== userId) {
             invitedBy = refId;
-            await update(ref(db, `ownership_v1/users/${refId}`), {
-              points: increment(Number(config.refBonus)),
+            await update(ref(db, `pzm_mining_v2/users/${refId}`), {
               refCount: increment(1)
             });
           }
         }
         await set(uRef, {
-          name: tgUser.first_name || "Holder",
+          name: tgUser.first_name || "Miner",
           username: tgUser.username || "",
-          points: 100,
-          refCount: 0,
+          poolBalance: 0,
+          holdingBalance: 0,
+          level: 1,
+          verified: false,
+          verifyStatus: "unverified",
+          miningStart: 0,
           invitedBy,
-          lastDaily: 0,
+          refCount: 0,
+          qualifiedRefs: 0,
           completedTasks: {},
           createdAt: Date.now()
         });
@@ -422,290 +625,460 @@
 
       onValue(uRef, (s) => {
         if (s.exists()) {
-          userData = s.val();
-          renderUserUI();
+          user = { ...user, ...s.val() };
+          renderAllUI();
         }
       });
     }
 
-    function renderUserUI() {
-      document.getElementById("ui-points").innerText = Number(userData.points || 0).toLocaleString();
-      document.getElementById("ui-ref-count").innerText = userData.refCount || 0;
-      document.getElementById("ui-ref-earned").innerText = `${((userData.refCount || 0) * config.refBonus).toLocaleString()} PTS`;
+    function renderAllUI() {
+      const lv = Number(user.level || 1);
+      const speedMult = 1 + (lv - 1) * 0.25;
+      const hold = Number(user.holdingBalance || 0);
+      const pool = Number(user.poolBalance || 0);
 
-      const now = Date.now();
-      const canDaily = (now - (userData.lastDaily || 0)) >= 86400000;
-      const btnDaily = document.getElementById("btn-daily");
-      if (!canDaily) {
-        btnDaily.innerText = "Claimed ✓";
-        btnDaily.disabled = true;
-        btnDaily.classList.add("opacity-50");
+      document.getElementById("hdr-lv").innerText = `LV ${lv}`;
+      document.getElementById("prof-lv-badge").innerText = `Level ${lv}`;
+      document.getElementById("prof-speed").innerText = `${speedMult.toFixed(2)}x Speed`;
+
+      // Next Level Upgrade Cost
+      const nextLv = lv + 1;
+      const cost = lv * Number(config.pzmCostPerLevel);
+      document.getElementById("next-lv-num").innerText = nextLv;
+      document.getElementById("next-lv-btn-num").innerText = nextLv;
+      document.getElementById("next-lv-cost").innerText = cost.toLocaleString();
+      document.getElementById("next-lv-cost-2").innerText = `${cost.toLocaleString()} PZM`;
+
+      // Assets
+      document.getElementById("holding-bal").innerText = hold.toFixed(4);
+      document.getElementById("pool-bal").innerText = pool.toFixed(4);
+      document.getElementById("total-assets").innerText = (hold + pool).toFixed(4);
+      document.getElementById("wd-avail-pool").innerText = `${pool.toFixed(4)} PZM`;
+
+      // Mining Action State
+      const statusPill = document.getElementById("mine-status-pill");
+      const actionArea = document.getElementById("mine-action-area");
+
+      if (user.verified) {
+        statusPill.className = "px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[11px] font-bold text-emerald-400 flex items-center gap-1.5";
+        statusPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> MINING`;
+        actionArea.innerHTML = `
+          <button onclick="claimMiningReward()" class="w-full py-4 rounded-2xl mint-btn font-extrabold text-sm tracking-wider uppercase shadow-lg active:scale-95 transition">
+            ⚡ CLAIM REWARD
+          </button>`;
+      } else if (user.verifyStatus === "pending") {
+        statusPill.className = "px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-[11px] font-bold text-amber-300 flex items-center gap-1.5";
+        statusPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> VERIFYING 0.1 GRAM`;
+        actionArea.innerHTML = `
+          <button disabled class="w-full py-4 rounded-2xl bg-zinc-800 text-amber-300 font-bold text-xs uppercase">
+            ⏳ Verification Pending Admin Approval...
+          </button>`;
       } else {
-        btnDaily.innerText = "Claim";
-        btnDaily.disabled = false;
-        btnDaily.classList.remove("opacity-50");
+        statusPill.className = "px-3 py-1 rounded-full bg-rose-500/15 border border-rose-500/30 text-[11px] font-bold text-rose-400 flex items-center gap-1.5";
+        statusPill.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span> NOT VERIFIED`;
+        actionArea.innerHTML = `
+          <button onclick="openVerifyModal()" class="w-full py-4 rounded-2xl gold-btn font-extrabold text-sm tracking-wider uppercase shadow-lg active:scale-95 transition">
+            🔐 VERIFY TO START MINING (0.1 GRAM)
+          </button>`;
       }
 
-      updateWithdrawChecks();
-      renderTasks();
+      // Withdraw Eligibility (Lv 3+)
+      const canWd = lv >= Number(config.minWithdrawLevel) && pool >= Number(config.minWithdrawAmt) && !!walletAddress;
+      document.getElementById("btn-withdraw").disabled = !canWd;
+      if (lv >= Number(config.minWithdrawLevel)) {
+        document.getElementById("wd-lock-badge").className = "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/20 text-emerald-400";
+        document.getElementById("wd-lock-badge").innerText = `✓ LV ${lv} Unlocked`;
+      }
+
+      // Referrals
+      const totalRef = Number(user.refCount || 0);
+      const qualRef = Number(user.qualifiedRefs || 0);
+      document.getElementById("stat-ref-total").innerText = totalRef;
+      document.getElementById("stat-ref-qual").innerText = qualRef;
+      document.getElementById("stat-ref-pending").innerText = Math.max(0, totalRef - qualRef);
+      document.getElementById("stat-ref-earned").innerText = (qualRef * Number(config.refReward)).toFixed(2);
     }
 
-    // 3. Level Calculation
-    function recalcLevel() {
-      const perLv = Math.max(1, Number(config.tokensPerLevel));
-      currentLevel = Math.floor(tokenBalance / perLv) + 1;
-      const nextLvTokens = currentLevel * perLv;
-      const prevLvTokens = (currentLevel - 1) * perLv;
-      const progress = Math.min(100, Math.max(4, ((tokenBalance - prevLvTokens) / perLv) * 100));
-      const boost = (1 + (currentLevel - 1) * 0.2).toFixed(1);
+    // Live Mining Counter Loop (Every 1 second)
+    setInterval(() => {
+      if (!user.verified || !user.miningStart) return;
+      const elapsedMs = Math.max(0, Date.now() - Number(user.miningStart));
+      const hrs = Math.floor(elapsedMs / 3600000);
+      const mins = Math.floor((elapsedMs % 3600000) / 60000);
 
-      document.getElementById("ui-level").innerText = currentLevel;
-      document.getElementById("ui-lv-pill").innerText = `LV ${currentLevel}`;
-      document.getElementById("ui-boost-badge").innerText = `${boost}x Boost`;
-      document.getElementById("ui-token-bal").innerText = tokenBalance.toLocaleString(undefined, { maximumFractionDigits: 1 });
-      document.getElementById("ui-next-req").innerText = nextLvTokens.toLocaleString();
-      document.getElementById("ui-lv-bar").style.width = `${progress}%`;
+      const lv = Number(user.level || 1);
+      const speedMult = 1 + (lv - 1) * 0.25;
+      const ratePerMs = (Number(config.mineRatePerHour) * speedMult) / 3600000;
+      const mined = elapsedMs * ratePerMs;
 
-      if (currentLevel >= config.minWithdrawLevel) {
-        document.getElementById("ui-lv-hint").innerHTML = `<span class="text-emerald-400 font-semibold">✅ Level ${config.minWithdrawLevel}+ Unlocked! Withdrawals enabled.</span>`;
-      } else {
-        const needed = (config.minWithdrawLevel - 1) * perLv - tokenBalance;
-        document.getElementById("ui-lv-hint").innerHTML = `Hold <strong class="text-amber-400">${Math.ceil(needed).toLocaleString()} more tokens</strong> to reach Lv ${config.minWithdrawLevel} & unlock withdrawals.`;
-      }
+      document.getElementById("mine-elapsed").innerText = `${hrs}h ${mins}m elapsed`;
+      document.getElementById("mine-session-earned").innerText = `${mined.toFixed(4)} PZM`;
+      document.getElementById("live-ticker").innerText = `+${mined.toFixed(4)}`;
 
-      updateWithdrawChecks();
-    }
+      const hold = Number(user.holdingBalance || 0);
+      const pool = Number(user.poolBalance || 0);
+      document.getElementById("total-assets").innerText = (hold + pool + mined).toFixed(4);
+    }, 1000);
 
-    // 4. TonAPI Jetton Balance Fetch
-    async function fetchJettonBalance(addr) {
-      try {
-        const res = await fetch(`https://tonapi.io/v2/accounts/${addr}/jettons/${JETTON_MASTER}`);
-        if (!res.ok) {
-          tokenBalance = 0;
-        } else {
-          const data = await res.json();
-          const dec = data.jetton?.decimals ?? 9;
-          tokenBalance = Number(data.balance) / Math.pow(10, dec);
-        }
-      } catch {
-        tokenBalance = 0;
-      }
-      recalcLevel();
-      await update(ref(db, `ownership_v1/users/${userId}`), {
-        wallet: addr,
-        tokenBalance,
-        level: currentLevel
+    // Claim Mined Reward into Pool Wallet
+    window.claimMiningReward = async () => {
+      if (!user.verified || !user.miningStart) return;
+      const elapsedMs = Math.max(0, Date.now() - Number(user.miningStart));
+      const lv = Number(user.level || 1);
+      const speedMult = 1 + (lv - 1) * 0.25;
+      const mined = elapsedMs * ((Number(config.mineRatePerHour) * speedMult) / 3600000);
+
+      if (mined < 0.0001) return alert("Keep mining a bit longer before claiming!");
+
+      await update(ref(db, `pzm_mining_v2/users/${userId}`), {
+        poolBalance: increment(mined),
+        miningStart: Date.now()
       });
-    }
-
-    // 5. Tasks Render & Complete
-    let allTasks = {};
-    onValue(ref(db, "ownership_v1/tasks"), (snap) => {
-      if (snap.exists()) {
-        allTasks = snap.val();
-      } else {
-        const defaults = {
-          t1: { title: "Join Ownership Official Channel", reward: 500, url: "https://t.me/telegram" },
-          t2: { title: "Follow Ownership on X (Twitter)", reward: 400, url: "https://x.com" }
-        };
-        set(ref(db, "ownership_v1/tasks"), defaults);
-        allTasks = defaults;
-      }
-      renderTasks();
-    });
-
-    function renderTasks() {
-      const box = document.getElementById("tasks-container");
-      const done = userData.completedTasks || {};
-      const entries = Object.entries(allTasks);
-      if (!entries.length) {
-        box.innerHTML = `<p class="text-xs text-zinc-500 text-center py-6">No quests available.</p>`;
-        return;
-      }
-      box.innerHTML = entries.map(([id, t]) => {
-        const isDone = !!done[id];
-        return `
-          <div class="glass rounded-2xl p-3.5 flex items-center justify-between">
-            <div>
-              <p class="text-sm font-bold text-white">${t.title}</p>
-              <p class="text-xs text-amber-400 font-semibold mt-0.5">+${t.reward} PTS</p>
-            </div>
-            <div class="flex items-center gap-2">
-              ${isAdminUnlocked ? `<button onclick="deleteTask('${id}')" class="text-rose-400 text-xs px-2 py-1">🗑️</button>` : ""}
-              <button ${isDone ? "disabled" : ""} onclick="doTask('${id}', ${t.reward}, '${t.url}')"
-                class="px-4 py-2 rounded-xl text-xs font-extrabold ${isDone ? "bg-zinc-800 text-zinc-500" : "bg-amber-500 text-zinc-950"}">
-                ${isDone ? "Done ✓" : "Start"}
-              </button>
-            </div>
-          </div>`;
-      }).join("");
-    }
-
-    window.doTask = async (id, baseReward, url) => {
-      if (url && url.startsWith("http")) window.open(url, "_blank");
-      const boost = 1 + (currentLevel - 1) * 0.2;
-      const finalPts = Math.round(baseReward * boost);
-      await update(ref(db, `ownership_v1/users/${userId}`), {
-        points: increment(finalPts),
-        [`completedTasks/${id}`]: true
-      });
+      document.getElementById("live-ticker").innerText = "+0.0000";
       tg.HapticFeedback?.notificationOccurred("success");
     };
 
-    window.claimDaily = async () => {
-      const boost = 1 + (currentLevel - 1) * 0.2;
-      const finalPts = Math.round(Number(config.dailyReward) * boost);
-      await update(ref(db, `ownership_v1/users/${userId}`), {
-        points: increment(finalPts),
-        lastDaily: Date.now()
-      });
-      tg.HapticFeedback?.notificationOccurred("success");
-    };
+    // 0.1 GRAM Verification Submission
+    window.openVerifyModal = () => document.getElementById("verify-modal").classList.remove("hidden");
+    window.closeVerifyModal = () => document.getElementById("verify-modal").classList.add("hidden");
 
-    // 6. Withdraw Eligibility & Submission
-    function updateWithdrawChecks() {
-      const okWallet = !!walletAddress;
-      const okLv = currentLevel >= Number(config.minWithdrawLevel);
-      const okPts = Number(userData.points || 0) >= Number(config.minWithdrawPts);
+    window.submitMiningVerify = async () => {
+      const proof = document.getElementById("verify-proof-input").value.trim();
+      if (!proof) return alert("Please enter your 0.1 GRAM payment TX hash or receipt note!");
 
-      document.getElementById("chk-wallet").innerHTML = okWallet ? `<span class="text-emerald-400">✅ Connected</span>` : `<span class="text-rose-400">❌ Connect Wallet</span>`;
-      document.getElementById("chk-level").innerHTML = okLv ? `<span class="text-emerald-400">✅ Lv ${currentLevel}</span>` : `<span class="text-rose-400">❌ Current Lv ${currentLevel}</span>`;
-      document.getElementById("chk-pts").innerHTML = okPts ? `<span class="text-emerald-400">✅ ${Number(userData.points).toLocaleString()} PTS</span>` : `<span class="text-rose-400">❌ ${Number(userData.points || 0).toLocaleString()} PTS</span>`;
-
-      document.getElementById("btn-submit-wd").disabled = !(okWallet && okLv && okPts);
-    }
-
-    window.submitWithdraw = async () => {
-      const amt = Number(document.getElementById("wd-amount").value);
-      if (amt < config.minWithdrawPts || amt > userData.points) {
-        return alert(`Enter amount between ${config.minWithdrawPts} and ${userData.points} PTS.`);
-      }
-      await update(ref(db, `ownership_v1/users/${userId}`), {
-        points: increment(-amt)
-      });
-      await push(ref(db, "ownership_v1/withdrawals"), {
+      await push(ref(db, "pzm_mining_v2/verifications"), {
         userId,
-        name: tgUser.first_name || "User",
-        wallet: walletAddress,
-        amount: amt,
-        level: currentLevel,
+        name: tgUser.first_name || "Miner",
+        proof,
         status: "pending",
         createdAt: Date.now()
       });
-      document.getElementById("wd-amount").value = "";
+      await update(ref(db, `pzm_mining_v2/users/${userId}`), {
+        verifyStatus: "pending"
+      });
+      closeVerifyModal();
+      alert("✅ 0.1 GRAM verification submitted! Mining will start once approved.");
+    };
+
+    // Level Upgrade Request (Pay PZM)
+    window.submitLevelUpgrade = async () => {
+      const proof = document.getElementById("lv-proof-input").value.trim();
+      if (!proof) return alert("Please paste your PZM transfer TX hash / proof!");
+
+      const targetLv = Number(user.level || 1) + 1;
+      const cost = Number(user.level || 1) * Number(config.pzmCostPerLevel);
+
+      await push(ref(db, "pzm_mining_v2/level_requests"), {
+        userId,
+        name: tgUser.first_name || "Miner",
+        targetLevel: targetLv,
+        costPzm: cost,
+        proof,
+        status: "pending",
+        createdAt: Date.now()
+      });
+      document.getElementById("lv-proof-input").value = "";
+      alert(`✅ Level ${targetLv} upgrade request submitted!`);
+    };
+
+    // Tasks & Promote Task
+    window.togglePromoteBox = () => document.getElementById("promote-task-box").classList.toggle("hidden");
+
+    window.submitPromoteTask = async () => {
+      const title = document.getElementById("promo-title").value.trim();
+      const link = document.getElementById("promo-link").value.trim();
+      const proof = document.getElementById("promo-proof").value.trim();
+      if (!title || !link || !proof) return alert("Fill all fields and payment proof!");
+
+      await push(ref(db, "pzm_mining_v2/promo_requests"), {
+        userId,
+        title,
+        link,
+        proof,
+        reward: 5,
+        status: "pending",
+        createdAt: Date.now()
+      });
+      document.getElementById("promo-title").value = "";
+      document.getElementById("promo-link").value = "";
+      document.getElementById("promo-proof").value = "";
+      togglePromoteBox();
+      alert("✅ Task submitted! It will go live after admin approval.");
+    };
+
+    onValue(ref(db, "pzm_mining_v2/tasks"), (snap) => {
+      let tasks = snap.val();
+      if (!tasks) {
+        tasks = {
+          t1: { title: "Join PRIZM Official Channel", reward: 10, link: "https://t.me/telegram" },
+          t2: { title: "Trade PZM on DeDust", reward: 15, link: "https://dedust.io/swap/TON/EQDROsytSxLtDp_2pRIEainUGqZPRBbXkwayVn7VAT7bHHWL" }
+        };
+        set(ref(db, "pzm_mining_v2/tasks"), tasks);
+      }
+      const done = user.completedTasks || {};
+      document.getElementById("tasks-list").innerHTML = Object.entries(tasks).map(([id, t]) => `
+        <div class="oc-card rounded-2xl p-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300 font-bold">P</div>
+            <div>
+              <p class="text-sm font-bold text-white">${t.title}</p>
+              <p class="text-xs font-bold text-amber-300">+${t.reward} PZM</p>
+            </div>
+          </div>
+          <button ${done[id] ? "disabled" : ""} onclick="completeTask('${id}', ${t.reward}, '${t.link}')"
+            class="px-4 py-2 rounded-full font-extrabold text-xs ${done[id] ? "bg-zinc-800 text-zinc-500" : "gold-btn"}">
+            ${done[id] ? "Done ✓" : "↗ Go"}
+          </button>
+        </div>`).join("");
+    });
+
+    window.completeTask = async (id, reward, link) => {
+      if (link && link.startsWith("http")) window.open(link, "_blank");
+      await update(ref(db, `pzm_mining_v2/users/${userId}`), {
+        poolBalance: increment(Number(reward)),
+        [`completedTasks/${id}`]: true
+      });
+    };
+
+    // Withdraw Pool Wallet (Lv 3+ Required)
+    window.submitWithdraw = async () => {
+      const amt = Number(document.getElementById("wd-amt-input").value);
+      if (Number(user.level || 1) < Number(config.minWithdrawLevel)) {
+        return alert(`You must be Level ${config.minWithdrawLevel}+ to withdraw!`);
+      }
+      if (amt < config.minWithdrawAmt || amt > user.poolBalance) {
+        return alert(`Enter amount between ${config.minWithdrawAmt} and ${user.poolBalance.toFixed(2)} PZM.`);
+      }
+      await update(ref(db, `pzm_mining_v2/users/${userId}`), {
+        poolBalance: increment(-amt)
+      });
+      await push(ref(db, "pzm_mining_v2/withdrawals"), {
+        userId,
+        name: tgUser.first_name || "Miner",
+        wallet: walletAddress,
+        amount: amt,
+        level: user.level,
+        status: "pending",
+        createdAt: Date.now()
+      });
+      document.getElementById("wd-amt-input").value = "";
       alert("✅ Withdrawal request submitted!");
     };
 
-    onValue(ref(db, "ownership_v1/withdrawals"), (snap) => {
-      const data = snap.val() || {};
-      const list = Object.entries(data).reverse();
-
-      const mine = list.filter(([, w]) => w.userId === userId);
-      document.getElementById("wd-history").innerHTML = mine.length ? mine.map(([, w]) => `
-        <div class="flex justify-between items-center bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
-          <span>${Number(w.amount).toLocaleString()} PTS</span>
-          <span class="uppercase font-bold ${w.status === 'paid' ? 'text-emerald-400' : w.status === 'rejected' ? 'text-rose-400' : 'text-amber-400'}">${w.status}</span>
-        </div>`).join("") : "No withdrawals yet.";
-
-      const pending = list.filter(([, w]) => w.status === "pending");
-      document.getElementById("adm-wd-list").innerHTML = pending.length ? pending.map(([wid, w]) => `
-        <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2">
-          <div class="flex justify-between">
-            <span class="font-bold text-white">${w.name} (Lv ${w.level})</span>
-            <span class="font-extrabold text-amber-400">${Number(w.amount).toLocaleString()} PTS</span>
+    // Admin Queues & Actions
+    onValue(ref(db, "pzm_mining_v2/verifications"), (snap) => {
+      const pending = Object.entries(snap.val() || {}).filter(([, v]) => v.status === "pending");
+      document.getElementById("adm-verify-list").innerHTML = pending.length ? pending.map(([id, v]) => `
+        <div class="bg-[#0b0d12] p-3 rounded-xl border border-zinc-800 space-y-1.5">
+          <p class="font-bold text-white">${v.name} (ID: ${v.userId})</p>
+          <p class="text-[11px] text-amber-300 break-all">Proof: ${v.proof}</p>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="approveVerify('${id}', '${v.userId}')" class="py-1.5 rounded-lg mint-btn font-bold">Approve ✓</button>
+            <button onclick="rejectItem('verifications', '${id}')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold">Reject ✕</button>
           </div>
-          <p class="text-[10px] font-mono text-zinc-400 truncate">${w.wallet}</p>
-          <div class="grid grid-cols-2 gap-2">
-            <button onclick="resolveWd('${wid}', 'paid')" class="py-1.5 rounded-lg bg-emerald-500 text-zinc-950 font-bold">Approve ✓</button>
-            <button onclick="resolveWd('${wid}', 'rejected')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold">Reject ✕</button>
-          </div>
-        </div>`).join("") : `<p class="text-zinc-500">No pending requests.</p>`;
+        </div>`).join("") : `<p class="text-zinc-500">None</p>`;
     });
 
-    // 7. Admin Functions
-    window.saveAdminSettings = async () => {
-      await set(ref(db, "ownership_v1/config"), {
-        minWithdrawLevel: Number(document.getElementById("adm-min-lv").value) || 3,
-        tokensPerLevel: Number(document.getElementById("adm-tok-per-lv").value) || 1000,
-        minWithdrawPts: Number(document.getElementById("adm-min-wd").value) || 5000,
-        refBonus: Number(document.getElementById("adm-ref-bonus").value) || 500,
-        dailyReward: Number(document.getElementById("adm-daily-pts").value) || 200,
-        adminPin: document.getElementById("adm-pin").value.trim() || "2026"
+    window.approveVerify = async (reqId, targetUid) => {
+      await update(ref(db, `pzm_mining_v2/verifications/${reqId}`), { status: "approved" });
+      const uSnap = await get(ref(db, `pzm_mining_v2/users/${targetUid}`));
+      const uData = uSnap.val() || {};
+      await update(ref(db, `pzm_mining_v2/users/${targetUid}`), {
+        verified: true,
+        verifyStatus: "verified",
+        miningStart: Date.now()
       });
-      alert("✅ Settings Updated Live!");
-    };
-
-    window.addNewTask = async () => {
-      const title = document.getElementById("adm-task-title").value.trim();
-      const reward = Number(document.getElementById("adm-task-reward").value);
-      const url = document.getElementById("adm-task-url").value.trim();
-      if (!title || !reward) return alert("Enter title and reward!");
-      await push(ref(db, "ownership_v1/tasks"), { title, reward, url });
-      document.getElementById("adm-task-title").value = "";
-      document.getElementById("adm-task-reward").value = "";
-      document.getElementById("adm-task-url").value = "";
-      alert("✅ New Task Added!");
-    };
-
-    window.deleteTask = async (id) => {
-      await remove(ref(db, `ownership_v1/tasks/${id}`));
-    };
-
-    window.resolveWd = async (wid, status) => {
-      await update(ref(db, `ownership_v1/withdrawals/${wid}`), { status });
-    };
-
-    // Helpers
-    let cachedBotUsername = "";
-    fetch("https://api.telegram.org/bot9051814925:AAFSt1XTIbZTW3aP1Pt78dttnp3v3gBzPdI/getMe")
-      .then(r => r.json())
-      .then(d => { if (d.ok) cachedBotUsername = d.result.username; })
-      .catch(() => {});
-
-    window.copyInviteLink = () => {
-      const uname = cachedBotUsername || "OwnershipCoinBot";
-      const link = `https://t.me/${uname}?start=ref_${userId}`;
-      navigator.clipboard.writeText(link);
-      alert("Invite Link Copied:\n" + link);
-    };
-
-    window.copyCA = () => {
-      navigator.clipboard.writeText(JETTON_MASTER);
-      alert("Contract Address Copied!");
-    };
-
-    window.switchTab = (name) => {
-      ["home", "tasks", "friends", "withdraw", "admin"].forEach(t => {
-        document.getElementById(`tab-${t}`).classList.add("hidden");
-        const nav = document.getElementById(`nav-${t}`);
-        if (nav) {
-          nav.classList.remove("tab-active");
-          nav.classList.add("text-zinc-400");
-        }
-      });
-      document.getElementById(`tab-${name}`).classList.remove("hidden");
-      const activeNav = document.getElementById(`nav-${name}`);
-      if (activeNav) {
-        activeNav.classList.add("tab-active");
-        activeNav.classList.remove("text-zinc-400");
+      // Credit Referrer if invited
+      if (uData.invitedBy) {
+        await update(ref(db, `pzm_mining_v2/users/${uData.invitedBy}`), {
+          qualifiedRefs: increment(1),
+          poolBalance: increment(Number(config.refReward))
+        });
       }
     };
 
+    onValue(ref(db, "pzm_mining_v2/level_requests"), (snap) => {
+      const pending = Object.entries(snap.val() || {}).filter(([, v]) => v.status === "pending");
+      document.getElementById("adm-lv-list").innerHTML = pending.length ? pending.map(([id, v]) => `
+        <div class="bg-[#0b0d12] p-3 rounded-xl border border-zinc-800 space-y-1.5">
+          <p class="font-bold text-white">${v.name} (ID: ${v.userId}) → <span class="text-amber-300">LV ${v.targetLevel} (${v.costPzm} PZM)</span></p>
+          <p class="text-[11px] text-zinc-400 break-all">Proof: ${v.proof}</p>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="approveLevel('${id}', '${v.userId}', ${v.targetLevel})" class="py-1.5 rounded-lg mint-btn font-bold">Approve LV ${v.targetLevel}</button>
+            <button onclick="rejectItem('level_requests', '${id}')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold">Reject</button>
+          </div>
+        </div>`).join("") : `<p class="text-zinc-500">None</p>`;
+    });
+
+    window.approveLevel = async (reqId, targetUid, newLv) => {
+      await update(ref(db, `pzm_mining_v2/level_requests/${reqId}`), { status: "approved" });
+      await update(ref(db, `pzm_mining_v2/users/${targetUid}`), { level: Number(newLv) });
+    };
+
+    window.adminSetUserLevel = async () => {
+      const uid = document.getElementById("adm-target-uid").value.trim();
+      const lv = Number(document.getElementById("adm-target-lv").value);
+      if (!uid || !lv) return alert("Enter User ID and Level!");
+      await update(ref(db, `pzm_mining_v2/users/${uid}`), { level: lv });
+      alert(`✅ User ${uid} updated to Level ${lv}!`);
+    };
+
+    onValue(ref(db, "pzm_mining_v2/promo_requests"), (snap) => {
+      const pending = Object.entries(snap.val() || {}).filter(([, v]) => v.status === "pending");
+      document.getElementById("adm-promo-list").innerHTML = pending.length ? pending.map(([id, v]) => `
+        <div class="bg-[#0b0d12] p-3 rounded-xl border border-zinc-800 space-y-1.5">
+          <p class="font-bold text-white">${v.title}</p>
+          <p class="text-[11px] text-zinc-400 truncate">${v.link} | Proof: ${v.proof}</p>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="approvePromo('${id}', '${v.title}', '${v.link}', ${v.reward})" class="py-1.5 rounded-lg mint-btn font-bold">Publish ✓</button>
+            <button onclick="rejectItem('promo_requests', '${id}')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold">Reject</button>
+          </div>
+        </div>`).join("") : `<p class="text-zinc-500">None</p>`;
+    });
+
+    window.approvePromo = async (id, title, link, reward) => {
+      await update(ref(db, `pzm_mining_v2/promo_requests/${id}`), { status: "approved" });
+      await push(ref(db, "pzm_mining_v2/tasks"), { title, link, reward: Number(reward || 5) });
+    };
+
+    onValue(ref(db, "pzm_mining_v2/withdrawals"), (snap) => {
+      const all = Object.entries(snap.val() || {}).reverse();
+      const mine = all.filter(([, w]) => w.userId === userId);
+      document.getElementById("user-wd-history").innerHTML = mine.map(([, w]) => `
+        <div class="flex justify-between bg-[#0b0d12] p-2.5 rounded-xl border border-zinc-800">
+          <span>${w.amount} PZM</span>
+          <span class="uppercase font-bold ${w.status === 'paid' ? 'text-emerald-400' : 'text-amber-300'}">${w.status}</span>
+        </div>`).join("");
+
+      const pending = all.filter(([, w]) => w.status === "pending");
+      document.getElementById("adm-wd-list").innerHTML = pending.length ? pending.map(([id, w]) => `
+        <div class="bg-[#0b0d12] p-3 rounded-xl border border-zinc-800 space-y-1.5">
+          <p class="font-bold text-white">${w.name} (LV ${w.level}) — ${w.amount} PZM</p>
+          <p class="text-[10px] font-mono text-zinc-400 truncate">${w.wallet}</p>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="update(ref(db, 'pzm_mining_v2/withdrawals/${id}'), {status:'paid'})" class="py-1.5 rounded-lg mint-btn font-bold">Mark Paid ✓</button>
+            <button onclick="rejectItem('withdrawals', '${id}')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold">Reject</button>
+          </div>
+        </div>`).join("") : `<p class="text-zinc-500">None</p>`;
+    });
+
+    window.rejectItem = async (node, id) => {
+      await update(ref(db, `pzm_mining_v2/${node}/${id}`), { status: "rejected" });
+    };
+
+    window.saveAdminConfig = async () => {
+      await set(ref(db, "pzm_mining_v2/config"), {
+        minWithdrawLevel: Number(document.getElementById("adm-min-wd-lv").value) || 3,
+        pzmCostPerLevel: Number(document.getElementById("adm-lv-cost").value) || 500,
+        mineRatePerHour: Number(document.getElementById("adm-mine-rate").value) || 4.0,
+        minWithdrawAmt: Number(document.getElementById("adm-min-wd-amt").value) || 100,
+        refReward: Number(document.getElementById("adm-ref-rew").value) || 100,
+        adminPin: document.getElementById("adm-pin").value.trim() || "2026"
+      });
+      alert("✅ Settings Saved!");
+    };
+
+    // Market Live Price & Estimate
+    window.fetchMarketData = async () => {
+      try {
+        const res = await fetch(`https://tonapi.io/v2/rates?tokens=${PZM_CONTRACT}&currencies=usd`);
+        const data = await res.json();
+        const rate = data?.rates?.[PZM_CONTRACT];
+        if (rate?.prices?.USD) {
+          pzmPriceUsd = Number(rate.prices.USD);
+          document.getElementById("mkt-price").innerText = `$${pzmPriceUsd.toFixed(6)}`;
+          document.getElementById("mkt-change").innerText = rate.diff_24h?.USD || "+1.51%";
+        }
+      } catch {}
+    };
+    fetchMarketData();
+
+    window.setTradeMode = (m) => {
+      tradeMode = m;
+      document.getElementById("btn-mode-buy").className = m === "buy" ? "py-2 rounded-lg mint-btn font-extrabold text-xs" : "py-2 rounded-lg text-zinc-400 font-bold text-xs";
+      document.getElementById("btn-mode-sell").className = m === "sell" ? "py-2 rounded-lg mint-btn font-extrabold text-xs" : "py-2 rounded-lg text-zinc-400 font-bold text-xs";
+      document.getElementById("trade-pay-lbl").innerText = m === "buy" ? "You pay (TON)" : "You sell (PZM)";
+      document.getElementById("trade-rec-lbl").innerText = m === "buy" ? "You receive • PZM" : "You receive • TON";
+      calcTradeEstimate();
+    };
+
+    window.calcTradeEstimate = () => {
+      const val = Number(document.getElementById("trade-input").value);
+      if (!val || val <= 0) {
+        document.getElementById("trade-output").innerText = "Enter an amount to see the estimate";
+        return;
+      }
+      const tonUsd = 5.2;
+      if (tradeMode === "buy") {
+        const estPzm = (val * tonUsd) / pzmPriceUsd;
+        document.getElementById("trade-output").innerText = `≈ ${estPzm.toLocaleString(undefined, { maximumFractionDigits: 2 })} PZM`;
+      } else {
+        const estTon = (val * pzmPriceUsd) / tonUsd;
+        document.getElementById("trade-output").innerText = `≈ ${estTon.toFixed(4)} TON`;
+      }
+    };
+
+    // TON Connect & Holding Wallet Sync
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
       buttonRootId: "ton-connect"
     });
 
-    tonConnectUI.onStatusChange(wallet => {
+    tonConnectUI.onStatusChange(async (wallet) => {
       if (wallet && wallet.account) {
         walletAddress = wallet.account.address;
-        fetchJettonBalance(walletAddress);
+        try {
+          const r = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons/${PZM_CONTRACT}`);
+          if (r.ok) {
+            const d = await r.json();
+            const bal = Number(d.balance) / Math.pow(10, d.jetton?.decimals ?? 9);
+            await update(ref(db, `pzm_mining_v2/users/${userId}`), { wallet: walletAddress, holdingBalance: bal });
+          }
+        } catch {}
       } else {
         walletAddress = null;
-        tokenBalance = 0;
-        recalcLevel();
       }
+      renderAllUI();
     });
+
+    // Referral Link & Helpers
+    let botUname = "";
+    fetch("https://api.telegram.org/bot9051814925:AAFSt1XTIbZTW3aP1Pt78dttnp3v3gBzPdI/getMe")
+      .then(r => r.json()).then(d => {
+        if (d.ok) {
+          botUname = d.result.username;
+          document.getElementById("my-ref-link").innerText = `https://t.me/${botUname}?start=ref_${userId}`;
+        }
+      });
+
+    window.copyInviteLink = () => {
+      const link = `https://t.me/${botUname || "PzmMiningBot"}?start=ref_${userId}`;
+      navigator.clipboard.writeText(link);
+      alert("Invite Link Copied!");
+    };
+    window.shareInviteLink = () => {
+      const link = `https://t.me/${botUname || "PzmMiningBot"}?start=ref_${userId}`;
+      tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Mine PZM tokens with me!")}`);
+    };
+    window.copyReceiverWallet = () => {
+      navigator.clipboard.writeText(RECEIVER_WALLET);
+      alert("Receiver Wallet Copied:\n" + RECEIVER_WALLET);
+    };
+    window.copyCA = () => {
+      navigator.clipboard.writeText(PZM_CONTRACT);
+      alert("PZM Contract Address Copied!");
+    };
+
+    window.switchTab = (tab) => {
+      ["mine", "tasks", "market", "friends", "profile", "admin"].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add("hidden");
+        const n = document.getElementById(`nav-${t}`);
+        if (n) { n.classList.remove("nav-active"); n.classList.add("text-zinc-500"); }
+      });
+      document.getElementById(`tab-${tab}`).classList.remove("hidden");
+      const active = document.getElementById(`nav-${tab}`);
+      if (active) { active.classList.add("nav-active"); active.classList.remove("text-zinc-500"); }
+    };
 
     initUser();
   </script>
