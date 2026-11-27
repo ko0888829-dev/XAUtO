@@ -162,7 +162,7 @@
         <p class="text-[11px] font-bold tracking-widest text-emerald-400 uppercase">TASK PROMOTION</p>
         <h3 class="text-lg font-extrabold text-white">Promote your task</h3>
         <p class="text-xs text-zinc-400 leading-relaxed">
-          Fee: <strong class="text-amber-300"><span id="promo-fee-lbl">0.5</span> GRAM</strong>. Opens Tonkeeper directly to confirm payment.
+          Fee: <strong class="text-amber-300"><span id="promo-fee-lbl">0.5</span> GRAM</strong>. Opens your wallet with Memo pre-filled automatically.
         </p>
 
         <input id="promo-title" type="text" placeholder="Task title (e.g. Join our channel)" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
@@ -568,8 +568,22 @@
       return 12000 + (lv - 3) * 6500;
     }
 
-    // ==================== DIRECT NATIVE COIN TRANSFER (0.1 GRAM = prev. Toncoin) ====================
-    // Sends clean native transfer without broken BOC payload so Tonkeeper W5 never cancels
+    // Standard UTF-8 Comment BOC Builder (100% Compatible with Tonkeeper W5)
+    function makeCommentPayload(text) {
+      const TonWeb = window.TonWeb;
+      const cell = new TonWeb.boc.Cell();
+      cell.bits.writeUint(0, 32);
+      const utf8Bytes = new TextEncoder().encode(text);
+      for (let i = 0; i < utf8Bytes.length; i++) {
+        cell.bits.writeUint(utf8Bytes[i], 8);
+      }
+      const boc = cell.toBoc(false);
+      let bin = "";
+      for (let i = 0; i < boc.length; i++) bin += String.fromCharCode(boc[i]);
+      return btoa(bin);
+    }
+
+    // 1. Direct Native Coin Transfer (0.1 GRAM + Auto Memo)
     window.sendDirectVerifyTx = async () => {
       if (!walletAddress) {
         tonConnectUI.openModal();
@@ -582,7 +596,8 @@
           messages: [
             {
               address: RECEIVER_WALLET,
-              amount: "100000000" // 0.1 GRAM (Native coin)
+              amount: "100000000", // 0.1 GRAM (Native coin)
+              payload: makeCommentPayload(memo)
             }
           ]
         });
@@ -591,7 +606,7 @@
           userId,
           name: tgUser.first_name || "Miner",
           wallet: walletAddress,
-          proof: `Wallet TX 0.1 GRAM (From: ${walletAddress})`,
+          proof: `Wallet TX 0.1 GRAM (Memo: ${memo})`,
           status: "pending",
           createdAt: Date.now()
         });
@@ -599,25 +614,25 @@
           verifyStatus: "pending",
           wallet: walletAddress
         });
-        alert(`✅ 0.1 GRAM sent! Tap "Check 0.1 GRAM Payment" in 15 seconds to start mining.`);
+        alert(`✅ 0.1 GRAM sent with Memo (${memo})! Tap "Check 0.1 GRAM Payment" in 15 seconds to start mining.`);
       } catch (e) {
         console.error(e);
         alert("Transaction cancelled or insufficient GRAM balance (needs ~0.11 GRAM).");
       }
     };
 
-    // Auto Check On-Chain 0.1 GRAM Verification by Sender Wallet Address
+    // Auto Check On-Chain 0.1 GRAM Verification by Memo & Amount
     window.checkVerifyOnChain = async () => {
-      if (!walletAddress) return alert("Connect your wallet first!");
+      const memo = `verify_${userId}`;
       let found = false;
 
       try {
         const res = await fetch(`https://toncenter.com/api/v2/getTransactions?address=${RECEIVER_WALLET}&limit=25`);
         const data = await res.json();
-        const myClean = walletAddress.replace(/[^a-zA-Z0-9]/g, "");
         found = (data.result || []).some(tx => {
+          const msg = tx.in_msg?.message || "";
           const val = Number(tx.in_msg?.value || 0);
-          return val >= 95000000; // >= ~0.1 GRAM incoming
+          return msg.includes(memo) && val >= 95000000;
         });
       } catch {}
 
@@ -635,11 +650,11 @@
         }
         alert("🎉 0.1 GRAM verified on-chain! Mining has started!");
       } else {
-        alert("0.1 GRAM transaction is still confirming on blockchain. Wait 15 seconds and tap Check again.");
+        alert(`0.1 GRAM transaction with memo "${memo}" is still confirming on blockchain. Wait 15 seconds and tap Check again.`);
       }
     };
 
-    // Direct Jetton Transfer for Level Upgrade (PZM + Memo)
+    // 2. Direct Jetton Transfer for Level Upgrade (PZM + Memo)
     window.sendDirectLevelUpgradeTx = async () => {
       if (!walletAddress) {
         tonConnectUI.openModal();
@@ -675,7 +690,8 @@
 
         const commentCell = new TonWeb.boc.Cell();
         commentCell.bits.writeUint(0, 32);
-        commentCell.bits.writeString(memo);
+        const utf8Memo = new TextEncoder().encode(memo);
+        for (let i = 0; i < utf8Memo.length; i++) commentCell.bits.writeUint(utf8Memo[i], 8);
 
         const body = new TonWeb.boc.Cell();
         body.bits.writeUint(0xf8a7ea5, 32);
@@ -747,7 +763,7 @@
       }
     };
 
-    // User Promote Task (Native GRAM Fee)
+    // 3. User Promote Task (Native GRAM Fee + Auto Memo)
     window.togglePromoteBox = () => document.getElementById("promote-task-box").classList.toggle("hidden");
 
     window.payAndSubmitPromoteTask = async () => {
@@ -761,6 +777,7 @@
       if (!title || !link) return alert("Enter Task Title and Task Link!");
 
       const feeGram = Number(config.promoFeeGram ?? 0.5);
+      const memo = `promo_${userId}`;
 
       try {
         await tonConnectUI.sendTransaction({
@@ -768,7 +785,8 @@
           messages: [
             {
               address: RECEIVER_WALLET,
-              amount: String(Math.round(feeGram * 1e9))
+              amount: String(Math.round(feeGram * 1e9)),
+              payload: makeCommentPayload(memo)
             }
           ]
         });
@@ -781,7 +799,7 @@
           chatId,
           checkJoin: !!chatId,
           reward: 20,
-          proof: `Paid ${feeGram} GRAM (From: ${walletAddress})`,
+          proof: `Paid ${feeGram} GRAM (Memo: ${memo})`,
           status: "pending",
           createdAt: Date.now()
         });
@@ -790,7 +808,7 @@
         document.getElementById("promo-link").value = "";
         document.getElementById("promo-chat-id").value = "";
         togglePromoteBox();
-        alert("✅ Fee paid & task submitted! Admin will publish it shortly.");
+        alert(`✅ Fee paid with Memo (${memo}) & task submitted!`);
       } catch (e) {
         console.error(e);
         alert("Transaction cancelled or failed.");
