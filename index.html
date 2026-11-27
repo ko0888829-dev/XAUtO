@@ -12,7 +12,7 @@
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: #07080a;
-      background-image: radial-gradient(circle at 50% 35%, rgba(168, 85, 247, 0.14), transparent 60%);
+      background-image: radial-gradient(circle at 50% 35%, rgba(168, 85, 247, 0.16), transparent 60%);
       color: #ffffff;
     }
     .oc-card {
@@ -20,36 +20,36 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(12px);
     }
-    .mint-btn {
-      background: #4ee6b5;
-      color: #06130e;
+    .mint-btn { background: #4ee6b5; color: #06130e; }
+    .gold-btn { background: #f5c518; color: #09090b; }
+    .nav-active { color: #f5c518; }
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 18px rgba(168, 85, 247, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 32px rgba(192, 132, 252, 0.75)); }
     }
-    .gold-btn {
-      background: #f5c518;
-      color: #09090b;
-    }
-    .nav-active {
-      color: #f5c518;
-    }
-    @keyframes spinSlow {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .vortex-ring {
-      animation: spinSlow 16s linear infinite;
-    }
+    .pzm-coin-anim { animation: pulseGlow 4s ease-in-out infinite; }
   </style>
 </head>
 <body class="min-h-screen pb-24 select-none overflow-x-hidden">
 
-  <!-- TOP HEADER (OC MINING STYLE) -->
+  <!-- TOP HEADER -->
   <header class="px-4 pt-4 pb-2 flex items-center justify-between">
     <div class="flex items-center gap-3" onclick="handleSecretAdminTap()">
-      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 via-emerald-400 to-sky-400 p-[2px]">
-        <div class="w-full h-full rounded-full bg-[#07080a] flex items-center justify-center font-extrabold text-sm text-white">
-          P
-        </div>
-      </div>
+      <!-- PZM Official Purple Coin SVG -->
+      <svg class="w-10 h-10 shrink-0 shadow-lg rounded-full" viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="pzmPurpleGrad" cx="35%" cy="25%" r="75%">
+            <stop offset="0%" stop-color="#c026d3" />
+            <stop offset="55%" stop-color="#7e22ce" />
+            <stop offset="100%" stop-color="#4c1d95" />
+          </radialGradient>
+        </defs>
+        <circle cx="50" cy="50" r="48" fill="url(#pzmPurpleGrad)" />
+        <path d="M20 27 L50 82 L80 27 L41 27 L41 36 L65 36 L50 64 L30 27 Z" fill="#ffffff" />
+        <path d="M25 46 L16 55 L21 60 L30 51 Z M31 56 L22 65 L27 70 L36 61 Z" fill="#ffffff" />
+        <path d="M75 46 L84 55 L79 60 L70 51 Z M69 56 L78 65 L73 70 L64 61 Z" fill="#ffffff" />
+      </svg>
+
       <div>
         <div class="flex items-center gap-1.5">
           <h1 class="text-base font-extrabold tracking-wide text-white">PZM MINING</h1>
@@ -99,7 +99,10 @@
       <div class="space-y-2.5">
         <div class="oc-card rounded-2xl px-4 py-3.5 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <span class="w-6 h-6 rounded-full border border-purple-400/50 flex items-center justify-center text-[11px] text-purple-300 font-bold">P</span>
+            <svg class="w-6 h-6 shrink-0" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="48" fill="url(#pzmPurpleGrad)" />
+              <path d="M20 27 L50 82 L80 27 L41 27 L41 36 L65 36 L50 64 L30 27 Z" fill="#ffffff" />
+            </svg>
             <span class="text-xs font-bold tracking-wider text-zinc-300 uppercase">HOLDING WALLET</span>
           </div>
           <span class="text-sm font-extrabold text-amber-300"><span id="holding-bal">0.0000</span> PZM ›</span>
@@ -107,40 +110,32 @@
 
         <div class="oc-card rounded-2xl px-4 py-3.5 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <span class="w-6 h-6 rounded-full border border-emerald-400/50 flex items-center justify-center text-[11px] text-emerald-300 font-bold">P</span>
+            <svg class="w-6 h-6 shrink-0" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="48" fill="url(#pzmPurpleGrad)" />
+              <path d="M20 27 L50 82 L80 27 L41 27 L41 36 L65 36 L50 64 L30 27 Z" fill="#ffffff" />
+            </svg>
             <span class="text-xs font-bold tracking-wider text-zinc-300 uppercase">POOL WALLET</span>
           </div>
           <span class="text-sm font-extrabold text-amber-300"><span id="pool-bal">0.0000</span> PZM ›</span>
         </div>
       </div>
 
-      <!-- Live Mining Ticker + Vortex Ring -->
-      <div class="text-center py-2 space-y-3">
+      <!-- Live Mining Ticker + Official PZM Coin Graphic -->
+      <div class="text-center py-2 space-y-4">
         <div id="live-ticker" class="text-3xl font-extrabold text-amber-300 tracking-wide">+0.0000</div>
 
-        <!-- Geometric Vortex Visual -->
-        <div class="relative w-44 h-44 mx-auto flex items-center justify-center">
-          <svg class="vortex-ring w-full h-full" viewBox="0 0 200 200">
-            <defs>
-              <linearGradient id="vortexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#a3e635" />
-                <stop offset="50%" stop-color="#38bdf8" />
-                <stop offset="100%" stop-color="#c084fc" />
-              </linearGradient>
-            </defs>
-            <g fill="none" stroke="url(#vortexGrad)" stroke-width="1.2" opacity="0.85">
-              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(0 100 100)" />
-              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(15 100 100)" />
-              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(30 100 100)" />
-              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(45 100 100)" />
-              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(60 100 100)" />
-              <rect x="42" y="42" width="116" height="116" rx="18" transform="rotate(75 100 100)" />
-            </g>
+        <!-- Center PZM Coin Logo -->
+        <div class="relative w-40 h-40 mx-auto flex items-center justify-center">
+          <svg class="pzm-coin-anim w-full h-full" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="48" fill="url(#pzmPurpleGrad)" />
+            <path d="M20 27 L50 82 L80 27 L41 27 L41 36 L65 36 L50 64 L30 27 Z" fill="#ffffff" />
+            <path d="M25 46 L16 55 L21 60 L30 51 Z M31 56 L22 65 L27 70 L36 61 Z" fill="#ffffff" />
+            <path d="M75 46 L84 55 L79 60 L70 51 Z M69 56 L78 65 L73 70 L64 61 Z" fill="#ffffff" />
           </svg>
         </div>
       </div>
 
-      <!-- Primary Action Button (Verify 0.1 GRAM OR Claim Reward) -->
+      <!-- Primary Action Button -->
       <div id="mine-action-area">
         <button onclick="openVerifyModal()" class="w-full py-4 rounded-2xl gold-btn font-extrabold text-sm tracking-wider uppercase shadow-lg active:scale-95 transition">
           🔐 VERIFY TO START MINING (0.1 GRAM)
@@ -159,7 +154,7 @@
         + Promote a task
       </button>
 
-      <!-- Promote Task Form (Hidden until clicked) -->
+      <!-- Promote Task Form -->
       <div id="promote-task-box" class="hidden oc-card rounded-3xl p-4 space-y-3 border border-emerald-500/30">
         <p class="text-[11px] font-bold tracking-widest text-emerald-400 uppercase">TASK PROMOTION</p>
         <h3 class="text-lg font-extrabold text-white">Promote your task</h3>
@@ -269,7 +264,6 @@
         </div>
       </div>
 
-      <!-- 3 Stats Boxes -->
       <div class="grid grid-cols-3 gap-2.5">
         <div class="oc-card rounded-2xl p-3 text-center">
           <p class="text-[10px] text-zinc-400">Total referrals</p>
@@ -291,10 +285,9 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 5: PROFILE (LEVEL UPGRADE + WITHDRAW) ==================== -->
+    <!-- ==================== TAB 5: PROFILE ==================== -->
     <section id="tab-profile" class="hidden space-y-4">
 
-      <!-- User Level & Upgrade Card -->
       <div class="oc-card rounded-3xl p-4 space-y-3 border border-purple-500/30">
         <div class="flex justify-between items-center">
           <div>
@@ -358,7 +351,7 @@
       <div class="oc-card rounded-3xl p-4 border border-rose-500/40 space-y-4">
         <div class="flex justify-between items-center border-b border-zinc-800 pb-2">
           <h2 class="text-base font-extrabold text-rose-400">⚙️ Admin Control Panel</h2>
-          <span class="text-[10px] text-zinc-400">PRIZM System</span>
+          <span class="text-[10px] text-zinc-400">Admin ID: 5330848428</span>
         </div>
 
         <!-- Direct User Level Setter -->
@@ -414,25 +407,21 @@
         </div>
       </div>
 
-      <!-- Queue 1: 0.1 GRAM Mining Verifications -->
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
         <h3 class="font-extrabold text-sm text-emerald-400">🔐 Pending 0.1 GRAM Verifications</h3>
         <div id="adm-verify-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
       </div>
 
-      <!-- Queue 2: Level Upgrade Requests -->
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
         <h3 class="font-extrabold text-sm text-amber-400">⬆️ Pending Level Upgrades</h3>
         <div id="adm-lv-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
       </div>
 
-      <!-- Queue 3: Promoted Tasks Approval -->
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
         <h3 class="font-extrabold text-sm text-purple-400">📢 Pending Promoted Tasks</h3>
         <div id="adm-promo-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
       </div>
 
-      <!-- Queue 4: Withdraw Requests -->
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
         <h3 class="font-extrabold text-sm text-rose-400">💸 Pending Withdrawals</h3>
         <div id="adm-wd-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
@@ -469,7 +458,7 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION (5 TABS LIKE OC MINING) -->
+  <!-- BOTTOM NAVIGATION -->
   <nav class="fixed bottom-0 inset-x-0 z-30 bg-[#0b0d12]/95 backdrop-blur border-t border-zinc-800/90">
     <div class="max-w-md mx-auto grid grid-cols-5 text-center py-2">
       <button onclick="switchTab('mine')" id="nav-mine" class="flex flex-col items-center gap-1 nav-active">
@@ -498,7 +487,7 @@
   <!-- FIREBASE & APP LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, get, set, update, push, remove, onValue, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, get, set, update, push, onValue, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB-XOl5CdJnC6WwkcX-HBkBTElw_YhC03M",
@@ -516,12 +505,13 @@
 
     const RECEIVER_WALLET = "UQBgIJ-WwfvyRgpAb58MXYYA37CvJ-MO55Kc_vH_tJmC8Ugy";
     const PZM_CONTRACT = "EQDROsytSxLtDp_2pRIEainUGqZPRBbXkwayVn7VAT7bHHWL";
-    const ADMIN_IDS = [];
+    const BOT_TOKEN_CLIENT = "9241066905:AAFbDT3i7I1e_gbo2kenGnjdHzhK2AdoBwA";
+    const ADMIN_IDS = ["5330848428"];
 
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    const tgUser = tg.initDataUnsafe?.user || { id: "demo_user_1", first_name: "PZM Miner", username: "miner" };
+    const tgUser = tg.initDataUnsafe?.user || { id: "5330848428", first_name: "Admin", username: "admin" };
     const userId = String(tgUser.id);
     const startParam = tg.initDataUnsafe?.start_param || "";
 
@@ -544,7 +534,7 @@
       holdingBalance: 0,
       level: 1,
       verified: false,
-      verifyStatus: "unverified", // unverified | pending | verified
+      verifyStatus: "unverified",
       miningStart: 0,
       refCount: 0,
       qualifiedRefs: 0,
@@ -641,7 +631,6 @@
       document.getElementById("prof-lv-badge").innerText = `Level ${lv}`;
       document.getElementById("prof-speed").innerText = `${speedMult.toFixed(2)}x Speed`;
 
-      // Next Level Upgrade Cost
       const nextLv = lv + 1;
       const cost = lv * Number(config.pzmCostPerLevel);
       document.getElementById("next-lv-num").innerText = nextLv;
@@ -649,13 +638,11 @@
       document.getElementById("next-lv-cost").innerText = cost.toLocaleString();
       document.getElementById("next-lv-cost-2").innerText = `${cost.toLocaleString()} PZM`;
 
-      // Assets
       document.getElementById("holding-bal").innerText = hold.toFixed(4);
       document.getElementById("pool-bal").innerText = pool.toFixed(4);
       document.getElementById("total-assets").innerText = (hold + pool).toFixed(4);
       document.getElementById("wd-avail-pool").innerText = `${pool.toFixed(4)} PZM`;
 
-      // Mining Action State
       const statusPill = document.getElementById("mine-status-pill");
       const actionArea = document.getElementById("mine-action-area");
 
@@ -682,7 +669,6 @@
           </button>`;
       }
 
-      // Withdraw Eligibility (Lv 3+)
       const canWd = lv >= Number(config.minWithdrawLevel) && pool >= Number(config.minWithdrawAmt) && !!walletAddress;
       document.getElementById("btn-withdraw").disabled = !canWd;
       if (lv >= Number(config.minWithdrawLevel)) {
@@ -690,7 +676,6 @@
         document.getElementById("wd-lock-badge").innerText = `✓ LV ${lv} Unlocked`;
       }
 
-      // Referrals
       const totalRef = Number(user.refCount || 0);
       const qualRef = Number(user.qualifiedRefs || 0);
       document.getElementById("stat-ref-total").innerText = totalRef;
@@ -699,7 +684,7 @@
       document.getElementById("stat-ref-earned").innerText = (qualRef * Number(config.refReward)).toFixed(2);
     }
 
-    // Live Mining Counter Loop (Every 1 second)
+    // Live Mining Counter Loop
     setInterval(() => {
       if (!user.verified || !user.miningStart) return;
       const elapsedMs = Math.max(0, Date.now() - Number(user.miningStart));
@@ -720,7 +705,6 @@
       document.getElementById("total-assets").innerText = (hold + pool + mined).toFixed(4);
     }, 1000);
 
-    // Claim Mined Reward into Pool Wallet
     window.claimMiningReward = async () => {
       if (!user.verified || !user.miningStart) return;
       const elapsedMs = Math.max(0, Date.now() - Number(user.miningStart));
@@ -738,7 +722,6 @@
       tg.HapticFeedback?.notificationOccurred("success");
     };
 
-    // 0.1 GRAM Verification Submission
     window.openVerifyModal = () => document.getElementById("verify-modal").classList.remove("hidden");
     window.closeVerifyModal = () => document.getElementById("verify-modal").classList.add("hidden");
 
@@ -760,7 +743,6 @@
       alert("✅ 0.1 GRAM verification submitted! Mining will start once approved.");
     };
 
-    // Level Upgrade Request (Pay PZM)
     window.submitLevelUpgrade = async () => {
       const proof = document.getElementById("lv-proof-input").value.trim();
       if (!proof) return alert("Please paste your PZM transfer TX hash / proof!");
@@ -781,7 +763,6 @@
       alert(`✅ Level ${targetLv} upgrade request submitted!`);
     };
 
-    // Tasks & Promote Task
     window.togglePromoteBox = () => document.getElementById("promote-task-box").classList.toggle("hidden");
 
     window.submitPromoteTask = async () => {
@@ -819,7 +800,10 @@
       document.getElementById("tasks-list").innerHTML = Object.entries(tasks).map(([id, t]) => `
         <div class="oc-card rounded-2xl p-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300 font-bold">P</div>
+            <svg class="w-9 h-9 shrink-0" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="48" fill="url(#pzmPurpleGrad)" />
+              <path d="M20 27 L50 82 L80 27 L41 27 L41 36 L65 36 L50 64 L30 27 Z" fill="#ffffff" />
+            </svg>
             <div>
               <p class="text-sm font-bold text-white">${t.title}</p>
               <p class="text-xs font-bold text-amber-300">+${t.reward} PZM</p>
@@ -840,7 +824,6 @@
       });
     };
 
-    // Withdraw Pool Wallet (Lv 3+ Required)
     window.submitWithdraw = async () => {
       const amt = Number(document.getElementById("wd-amt-input").value);
       if (Number(user.level || 1) < Number(config.minWithdrawLevel)) {
@@ -865,7 +848,7 @@
       alert("✅ Withdrawal request submitted!");
     };
 
-    // Admin Queues & Actions
+    // Admin Queues
     onValue(ref(db, "pzm_mining_v2/verifications"), (snap) => {
       const pending = Object.entries(snap.val() || {}).filter(([, v]) => v.status === "pending");
       document.getElementById("adm-verify-list").innerHTML = pending.length ? pending.map(([id, v]) => `
@@ -888,7 +871,6 @@
         verifyStatus: "verified",
         miningStart: Date.now()
       });
-      // Credit Referrer if invited
       if (uData.invitedBy) {
         await update(ref(db, `pzm_mining_v2/users/${uData.invitedBy}`), {
           qualifiedRefs: increment(1),
@@ -956,11 +938,15 @@
           <p class="font-bold text-white">${w.name} (LV ${w.level}) — ${w.amount} PZM</p>
           <p class="text-[10px] font-mono text-zinc-400 truncate">${w.wallet}</p>
           <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="update(ref(db, 'pzm_mining_v2/withdrawals/${id}'), {status:'paid'})" class="py-1.5 rounded-lg mint-btn font-bold">Mark Paid ✓</button>
+            <button onclick="markWdPaid('${id}')" class="py-1.5 rounded-lg mint-btn font-bold">Mark Paid ✓</button>
             <button onclick="rejectItem('withdrawals', '${id}')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold">Reject</button>
           </div>
         </div>`).join("") : `<p class="text-zinc-500">None</p>`;
     });
+
+    window.markWdPaid = async (id) => {
+      await update(ref(db, `pzm_mining_v2/withdrawals/${id}`), { status: "paid" });
+    };
 
     window.rejectItem = async (node, id) => {
       await update(ref(db, `pzm_mining_v2/${node}/${id}`), { status: "rejected" });
@@ -1043,7 +1029,7 @@
 
     // Referral Link & Helpers
     let botUname = "";
-    fetch("https://api.telegram.org/bot9051814925:AAFSt1XTIbZTW3aP1Pt78dttnp3v3gBzPdI/getMe")
+    fetch(`https://api.telegram.org/bot${BOT_TOKEN_CLIENT}/getMe`)
       .then(r => r.json()).then(d => {
         if (d.ok) {
           botUname = d.result.username;
