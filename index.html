@@ -6,7 +6,6 @@
   <title>PZM MINING — PRIZM Protocol</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-  <script src="https://unpkg.com/tonweb@0.0.66/dist/tonweb.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -162,7 +161,7 @@
         <p class="text-[11px] font-bold tracking-widest text-emerald-400 uppercase">TASK PROMOTION</p>
         <h3 class="text-lg font-extrabold text-white">Promote your task</h3>
         <p class="text-xs text-zinc-400 leading-relaxed">
-          Fee: <strong class="text-amber-300"><span id="promo-fee-lbl">1.0</span> GRAM</strong>. Opens your connected TON wallet with Memo automatically pre-filled.
+          Fee: <strong class="text-amber-300"><span id="promo-fee-lbl">1.0</span> GRAM</strong>. Opens Tonkeeper directly with Receiver Wallet, Amount & Memo pre-filled.
         </p>
 
         <input id="promo-title" type="text" placeholder="Task title (e.g. Join our channel)" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
@@ -170,7 +169,7 @@
         <input id="promo-chat-id" type="text" placeholder="Channel @username (optional, if bot is admin)" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-3 text-xs text-white" />
 
         <button onclick="payAndSubmitPromoteTask()" class="w-full py-3.5 rounded-xl mint-btn font-extrabold text-xs shadow-lg">
-          💎 Pay Fee in Wallet & Submit Task
+          💎 Pay Fee in Tonkeeper & Submit Task
         </button>
       </div>
 
@@ -313,17 +312,17 @@
           📊 View Level 1 – 100 Hourly Rates & Prices
         </button>
 
-        <!-- Direct Wallet Upgrade Section -->
+        <!-- Direct Tonkeeper Upgrade Section -->
         <div id="upgrade-box-area" class="pt-2 border-t border-zinc-800 space-y-2.5">
           <div class="flex justify-between items-center">
             <h3 class="text-sm font-extrabold text-white">⬆️ Upgrade to Level <span id="next-lv-num">2</span></h3>
             <span class="text-xs font-bold text-purple-400">Cost: <span id="next-lv-cost">1,500</span> PZM</span>
           </div>
           <p class="text-[11px] text-zinc-400 leading-relaxed">
-            Tap below to open your connected TON wallet with <strong id="next-lv-cost-2" class="text-white">1,500 PZM</strong> and Memo <code id="next-lv-memo" class="text-amber-300 bg-zinc-900 px-1.5 py-0.5 rounded">lv2_...</code> pre-filled automatically:
+            Tap below to open Tonkeeper with <strong id="next-lv-cost-2" class="text-white">1,500 PZM</strong> and Memo <code id="next-lv-memo" class="text-amber-300 bg-zinc-900 px-1.5 py-0.5 rounded">lv2_...</code> pre-filled automatically:
           </p>
           <button onclick="sendDirectLevelUpgradeTx()" class="w-full py-3.5 rounded-xl gold-btn font-extrabold text-xs shadow-lg active:scale-95 transition">
-            💎 Pay <span id="next-lv-btn-cost">1,500</span> PZM in Wallet (Upgrade LV <span id="next-lv-btn-num">2</span>)
+            💎 Pay <span id="next-lv-btn-cost">1,500</span> PZM in Tonkeeper (Upgrade LV <span id="next-lv-btn-num">2</span>)
           </button>
           <button onclick="verifyLevelTxOnChain()" class="w-full py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-emerald-400 font-bold text-xs">
             🔄 Check Wallet Payment & Unlock LV <span id="next-lv-chk-num">2</span>
@@ -566,196 +565,136 @@
       return 12000 + (lv - 3) * 6500;
     }
 
-    // ==================== DIRECT TONCENTER RPC JETTON WALLET RESOLVER ====================
-    // Computes exact Jetton Wallet address via TON Center RPC without TonAPI rate-limit issues
-    async function resolveJettonWalletAddress(ownerAddress, jettonMasterAddress) {
-      const TonWeb = window.TonWeb;
-      const cell = new TonWeb.boc.Cell();
-      cell.bits.writeAddress(new TonWeb.utils.Address(ownerAddress));
-      const bocBase64 = TonWeb.utils.bytesToBase64(await cell.toBoc(false));
-
-      const res = await fetch("https://toncenter.com/api/v2/runGetMethod", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address: jettonMasterAddress,
-          method: "get_wallet_address",
-          stack: [["tvm.Slice", bocBase64]]
-        })
-      });
-      const data = await res.json();
-      if (!data.ok || !data.result?.stack?.[0]?.[1]?.bytes) {
-        throw new Error("Could not resolve Jetton wallet address");
+    // ==================== TONKEEPER DIRECT UNIVERSAL TRANSFER LINK ====================
+    function openTonkeeperJettonTransfer(jettonMaster, amountTokens, memoText) {
+      const amountNano = Math.round(amountTokens * 1e9);
+      const url = `https://app.tonkeeper.com/transfer/${RECEIVER_WALLET}?jetton=${jettonMaster}&amount=${amountNano}&text=${encodeURIComponent(memoText)}`;
+      if (tg && tg.openLink) {
+        tg.openLink(url);
+      } else {
+        window.open(url, "_blank");
       }
-      const sliceBytes = TonWeb.utils.base64ToBytes(data.result.stack[0][1].bytes);
-      const sliceCell = TonWeb.boc.Cell.oneFromBoc(sliceBytes);
-      const slice = sliceCell.beginParse();
-      const jwAddr = slice.loadAddress();
-      return jwAddr.toString(true, true, true);
     }
 
-    // ==================== TON JETTON TRANSFER BOC BUILDER (WITH MEMO) ====================
-    async function buildJettonTransferPayload(amountTokens, decimals, receiverAddr, memoText) {
-      const TonWeb = window.TonWeb;
-      const Cell = TonWeb.boc.Cell;
-      const Address = TonWeb.utils.Address;
-
-      const commentCell = new Cell();
-      commentCell.bits.writeUint(0, 32);
-      commentCell.bits.writeString(memoText);
-
-      const amountNano = BigInt(Math.round(amountTokens * Math.pow(10, decimals)));
-
-      const body = new Cell();
-      body.bits.writeUint(0xf8a7ea5, 32);
-      body.bits.writeUint(0, 64);
-      body.bits.writeCoins(amountNano);
-      body.bits.writeAddress(new Address(receiverAddr));
-      body.bits.writeAddress(new Address(walletAddress));
-      body.bits.writeBit(0);
-      body.bits.writeCoins(TonWeb.utils.toNano("0.01"));
-      body.bits.writeBit(1);
-      body.refs.push(commentCell);
-
-      const bocBytes = await body.toBoc(false);
-      return TonWeb.utils.bytesToBase64(bocBytes);
-    }
-
-    // Direct Wallet Transaction for 0.1 GRAM Verification
+    // 1. Direct Wallet Transaction for 0.1 GRAM Verification
     window.sendDirectVerifyTx = async () => {
-      if (!walletAddress) {
-        tonConnectUI.openModal();
-        return alert("Please connect your TON Wallet first!");
-      }
-
       const memo = `verify_${userId}`;
-      try {
-        const userGramJettonWallet = await resolveJettonWalletAddress(walletAddress, GRAM_CONTRACT);
-        const payloadBoc = await buildJettonTransferPayload(0.1, 9, RECEIVER_WALLET, memo);
+      openTonkeeperJettonTransfer(GRAM_CONTRACT, 0.1, memo);
 
-        await tonConnectUI.sendTransaction({
-          validUntil: Math.floor(Date.now() / 1000) + 300,
-          messages: [
-            {
-              address: userGramJettonWallet,
-              amount: "50000000", // 0.05 TON gas
-              payload: payloadBoc
-            }
-          ]
-        });
-
-        await push(ref(db, "pzm_mining_v2/verifications"), {
-          userId,
-          name: tgUser.first_name || "Miner",
-          proof: `Wallet TX 0.1 GRAM (Memo: ${memo})`,
-          status: "pending",
-          createdAt: Date.now()
-        });
-        await update(ref(db, `pzm_mining_v2/users/${userId}`), {
-          verifyStatus: "pending"
-        });
-        alert(`✅ 0.1 GRAM sent with Memo (${memo})! Tap "Check 0.1 GRAM Payment" in 15 seconds.`);
-      } catch (e) {
-        console.error(e);
-        alert("Wallet transaction cancelled or failed. Ensure you have 0.1 GRAM (unstaked) + 0.05 TON gas.");
-      }
+      await push(ref(db, "pzm_mining_v2/verifications"), {
+        userId,
+        name: tgUser.first_name || "Miner",
+        proof: `Tonkeeper TX 0.1 GRAM (Memo: ${memo})`,
+        status: "pending",
+        createdAt: Date.now()
+      });
+      await update(ref(db, `pzm_mining_v2/users/${userId}`), {
+        verifyStatus: "pending"
+      });
     };
 
-    // Auto Check On-Chain Verification via TON Center Transactions
+    // Auto Check On-Chain Verification (Checks both TonAPI events & TON Center)
     window.checkVerifyOnChain = async () => {
+      const memo = `verify_${userId}`;
+      let found = false;
+
       try {
-        const memo = `verify_${userId}`;
-        const res = await fetch(`https://toncenter.com/api/v2/getTransactions?address=${RECEIVER_WALLET}&limit=20`);
-        const data = await res.json();
-        const found = (data.result || []).some(tx => {
-          const msg = tx.in_msg?.message || "";
-          return msg.includes(memo);
-        });
-        if (found) {
-          await update(ref(db, `pzm_mining_v2/users/${userId}`), {
-            verified: true,
-            verifyStatus: "verified",
-            miningStart: Date.now()
-          });
-          if (user.invitedBy) {
-            await update(ref(db, `pzm_mining_v2/users/${user.invitedBy}`), {
-              qualifiedRefs: increment(1),
-              poolBalance: increment(Number(config.refReward))
-            });
-          }
-          alert("🎉 Payment verified on-chain! Mining has started!");
-        } else {
-          alert("Transaction still confirming on TON blockchain. Wait 15 seconds and tap Check again.");
+        const res = await fetch(`https://tonapi.io/v2/accounts/${RECEIVER_WALLET}/events?limit=25`);
+        if (res.ok) {
+          const data = await res.json();
+          found = (data.events || []).some(ev =>
+            (ev.actions || []).some(act =>
+              act.type === "JettonTransfer" &&
+              (act.JettonTransfer?.comment || "").includes(memo)
+            )
+          );
         }
-      } catch {
-        alert("Could not verify right now. Try again in a few seconds.");
+      } catch {}
+
+      if (!found) {
+        try {
+          const res2 = await fetch(`https://toncenter.com/api/v2/getTransactions?address=${RECEIVER_WALLET}&limit=20`);
+          const data2 = await res2.json();
+          found = (data2.result || []).some(tx => (tx.in_msg?.message || "").includes(memo));
+        } catch {}
+      }
+
+      if (found) {
+        await update(ref(db, `pzm_mining_v2/users/${userId}`), {
+          verified: true,
+          verifyStatus: "verified",
+          miningStart: Date.now()
+        });
+        if (user.invitedBy) {
+          await update(ref(db, `pzm_mining_v2/users/${user.invitedBy}`), {
+            qualifiedRefs: increment(1),
+            poolBalance: increment(Number(config.refReward))
+          });
+        }
+        alert("🎉 Payment verified on-chain! Mining has started!");
+      } else {
+        alert(`Transaction with memo "${memo}" is still confirming on TON blockchain. Please wait 15 seconds and tap Check again.`);
       }
     };
 
-    // Direct Wallet Transaction for Level Upgrade (PZM + Memo)
+    // 2. Direct Wallet Transaction for Level Upgrade (PZM + Memo)
     window.sendDirectLevelUpgradeTx = async () => {
-      if (!walletAddress) {
-        tonConnectUI.openModal();
-        return alert("Please connect your TON Wallet first!");
-      }
       const currLv = Number(user.level || 1);
       if (currLv >= MAX_LEVEL) return alert("Already at Max Level 100!");
       const targetLv = currLv + 1;
       const costPzm = getUpgradeCost(currLv);
       const memo = `lv${targetLv}_${userId}`;
 
-      try {
-        const userPzmJettonWallet = await resolveJettonWalletAddress(walletAddress, PZM_CONTRACT);
-        const payloadBoc = await buildJettonTransferPayload(costPzm, 9, RECEIVER_WALLET, memo);
+      openTonkeeperJettonTransfer(PZM_CONTRACT, costPzm, memo);
 
-        await tonConnectUI.sendTransaction({
-          validUntil: Math.floor(Date.now() / 1000) + 300,
-          messages: [
-            {
-              address: userPzmJettonWallet,
-              amount: "50000000",
-              payload: payloadBoc
-            }
-          ]
-        });
-
-        await push(ref(db, "pzm_mining_v2/level_requests"), {
-          userId,
-          name: tgUser.first_name || "Miner",
-          targetLevel: targetLv,
-          costPzm,
-          proof: `Wallet TX ${costPzm} PZM (Memo: ${memo})`,
-          status: "pending",
-          createdAt: Date.now()
-        });
-        alert(`✅ ${costPzm} PZM sent with Memo (${memo})! Tap "Check Wallet Payment" to unlock Level ${targetLv}.`);
-      } catch (e) {
-        console.error(e);
-        alert(`Transaction cancelled or insufficient PZM (${costPzm} PZM) / TON gas.`);
-      }
+      await push(ref(db, "pzm_mining_v2/level_requests"), {
+        userId,
+        name: tgUser.first_name || "Miner",
+        targetLevel: targetLv,
+        costPzm,
+        proof: `Tonkeeper TX ${costPzm} PZM (Memo: ${memo})`,
+        status: "pending",
+        createdAt: Date.now()
+      });
     };
 
-    // Auto Check On-Chain Level Upgrade via TON Center
+    // Auto Check On-Chain Level Upgrade
     window.verifyLevelTxOnChain = async () => {
       const currLv = Number(user.level || 1);
       const targetLv = currLv + 1;
       const memo = `lv${targetLv}_${userId}`;
+      let found = false;
+
       try {
-        const res = await fetch(`https://toncenter.com/api/v2/getTransactions?address=${RECEIVER_WALLET}&limit=20`);
-        const data = await res.json();
-        const found = (data.result || []).some(tx => (tx.in_msg?.message || "").includes(memo));
-        if (found) {
-          await update(ref(db, `pzm_mining_v2/users/${userId}`), { level: targetLv });
-          alert(`🎉 Level ${targetLv} Unlocked! Mining speed is now ${getHourlyRate(targetLv)} PZM/hr!`);
-        } else {
-          alert(`Payment with memo "${memo}" not confirmed yet. Wait 15 seconds and check again.`);
+        const res = await fetch(`https://tonapi.io/v2/accounts/${RECEIVER_WALLET}/events?limit=25`);
+        if (res.ok) {
+          const data = await res.json();
+          found = (data.events || []).some(ev =>
+            (ev.actions || []).some(act =>
+              act.type === "JettonTransfer" &&
+              (act.JettonTransfer?.comment || "").includes(memo)
+            )
+          );
         }
-      } catch {
-        alert("Network busy. Try again in a few seconds.");
+      } catch {}
+
+      if (!found) {
+        try {
+          const res2 = await fetch(`https://toncenter.com/api/v2/getTransactions?address=${RECEIVER_WALLET}&limit=20`);
+          const data2 = await res2.json();
+          found = (data2.result || []).some(tx => (tx.in_msg?.message || "").includes(memo));
+        } catch {}
+      }
+
+      if (found) {
+        await update(ref(db, `pzm_mining_v2/users/${userId}`), { level: targetLv });
+        alert(`🎉 Level ${targetLv} Unlocked! Mining speed is now ${getHourlyRate(targetLv)} PZM/hr!`);
+      } else {
+        alert(`Payment with memo "${memo}" not confirmed yet. Wait 15 seconds and check again.`);
       }
     };
 
-    // ==================== USER PROMOTE TASK (FEE IN WALLET + MEMO) ====================
+    // 3. User Promote Task (Fee in GRAM + Memo)
     window.togglePromoteBox = () => document.getElementById("promote-task-box").classList.toggle("hidden");
 
     window.payAndSubmitPromoteTask = async () => {
@@ -764,51 +703,28 @@
       const chatId = document.getElementById("promo-chat-id").value.trim();
       if (!title || !link) return alert("Enter Task Title and Task Link!");
 
-      if (!walletAddress) {
-        tonConnectUI.openModal();
-        return alert("Please connect your TON Wallet to pay the promotion fee!");
-      }
-
       const feeGram = Number(config.promoFeeGram || 1.0);
       const memo = `promo_${userId}`;
 
-      try {
-        const userGramJettonWallet = await resolveJettonWalletAddress(walletAddress, GRAM_CONTRACT);
-        const payloadBoc = await buildJettonTransferPayload(feeGram, 9, RECEIVER_WALLET, memo);
+      openTonkeeperJettonTransfer(GRAM_CONTRACT, feeGram, memo);
 
-        await tonConnectUI.sendTransaction({
-          validUntil: Math.floor(Date.now() / 1000) + 300,
-          messages: [
-            {
-              address: userGramJettonWallet,
-              amount: "50000000",
-              payload: payloadBoc
-            }
-          ]
-        });
+      await push(ref(db, "pzm_mining_v2/promo_requests"), {
+        userId,
+        name: tgUser.first_name || "User",
+        title,
+        link,
+        chatId,
+        checkJoin: !!chatId,
+        reward: 20,
+        proof: `Tonkeeper TX ${feeGram} GRAM (Memo: ${memo})`,
+        status: "pending",
+        createdAt: Date.now()
+      });
 
-        await push(ref(db, "pzm_mining_v2/promo_requests"), {
-          userId,
-          name: tgUser.first_name || "User",
-          title,
-          link,
-          chatId,
-          checkJoin: !!chatId,
-          reward: 20,
-          proof: `Paid ${feeGram} GRAM (Memo: ${memo})`,
-          status: "pending",
-          createdAt: Date.now()
-        });
-
-        document.getElementById("promo-title").value = "";
-        document.getElementById("promo-link").value = "";
-        document.getElementById("promo-chat-id").value = "";
-        togglePromoteBox();
-        alert("✅ Fee paid & task submitted! It will go live once approved by an admin.");
-      } catch (e) {
-        console.error(e);
-        alert("Transaction cancelled or failed.");
-      }
+      document.getElementById("promo-title").value = "";
+      document.getElementById("promo-link").value = "";
+      document.getElementById("promo-chat-id").value = "";
+      togglePromoteBox();
     };
 
     // Secret 5-Tap Admin Unlock
@@ -941,7 +857,7 @@
               🔄 Check 0.1 GRAM Payment & Start Mining
             </button>
             <button onclick="sendDirectVerifyTx()" class="w-full py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold text-[11px]">
-              Re-open Wallet (0.1 GRAM)
+              Re-open Tonkeeper (0.1 GRAM)
             </button>
           </div>`;
       } else {
@@ -1307,7 +1223,6 @@
       }
     };
 
-    // TON Connect & Holding PZM Sync
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
       buttonRootId: "ton-connect"
