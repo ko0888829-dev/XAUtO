@@ -10,8 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background: #09090b; color: #fafafa; }
-    .glass { background: rgba(24, 24, 27, 0.75); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .gold-glow { box-shadow: 0 0 25px rgba(245, 158, 11, 0.18); }
+    .glass { background: rgba(24, 24, 27, 0.78); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .gold-glow { box-shadow: 0 0 28px rgba(245, 158, 11, 0.2); }
     .tab-active { color: #fbbf24; border-top: 2px solid #fbbf24; }
   </style>
 </head>
@@ -19,7 +19,7 @@
 
   <!-- Top Header -->
   <header class="sticky top-0 z-30 glass px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-2.5">
+    <div class="flex items-center gap-2.5" onclick="handleSecretAdminTap()">
       <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center text-zinc-950 font-extrabold text-base shadow-lg">
         O
       </div>
@@ -35,7 +35,6 @@
     </div>
 
     <div class="flex items-center gap-2">
-      <!-- Admin Button (Admin ID ဖြစ်မှသာ ပေါ်မည်) -->
       <button id="btn-admin-open" onclick="switchTab('admin')" class="hidden px-2.5 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs font-bold">
         ⚙️ Admin
       </button>
@@ -50,7 +49,7 @@
     <section id="tab-home" class="space-y-4">
 
       <!-- Hero Balance Card -->
-      <div class="relative rounded-3xl p-5 bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/30 border border-amber-500/25 gold-glow overflow-hidden">
+      <div class="relative rounded-3xl p-5 bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/35 border border-amber-500/25 gold-glow overflow-hidden">
         <div class="flex justify-between items-center">
           <span class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Ownership Balance</span>
           <span id="ui-boost-badge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
@@ -162,7 +161,6 @@
           </span>
         </div>
 
-        <!-- Eligibility Status Box -->
         <div id="wd-status-box" class="p-3.5 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2 text-xs">
           <div class="flex justify-between">
             <span class="text-zinc-400">1. Wallet Connected:</span>
@@ -190,7 +188,6 @@
         </button>
       </div>
 
-      <!-- Withdraw History -->
       <div class="glass rounded-2xl p-4 space-y-2">
         <h3 class="text-xs font-bold text-zinc-400 uppercase">Your Withdrawal History</h3>
         <div id="wd-history" class="space-y-2 text-xs text-zinc-400">
@@ -207,7 +204,6 @@
           <span class="text-[11px] text-zinc-400">Live Firebase Sync</span>
         </div>
 
-        <!-- System Settings -->
         <div class="space-y-3 text-xs">
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -231,9 +227,15 @@
             </div>
           </div>
 
-          <div>
-            <label class="text-zinc-400 block mb-1">Daily Check-in Reward PTS</label>
-            <input id="adm-daily-pts" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-zinc-400 block mb-1">Daily Check-in PTS</label>
+              <input id="adm-daily-pts" type="number" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
+            </div>
+            <div>
+              <label class="text-zinc-400 block mb-1">Admin Secret PIN</label>
+              <input id="adm-pin" type="text" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-bold" />
+            </div>
           </div>
 
           <button onclick="saveAdminSettings()"
@@ -298,24 +300,23 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, get, set, update, push, remove, onValue, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // ⚠️ သင့် Firebase Config (adpro-bot) အမှန်ကို ဒီမှာ အစားထိုးထည့်ပါ
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
+      apiKey: "AIzaSyB-XOl5CdJnC6WwkcX-HBkBTElw_YhC03M",
       authDomain: "adpro-bot.firebaseapp.com",
       databaseURL: "https://adpro-bot-default-rtdb.firebaseio.com",
       projectId: "adpro-bot",
-      storageBucket: "adpro-bot.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      storageBucket: "adpro-bot.firebasestorage.app",
+      messagingSenderId: "41854671740",
+      appId: "1:41854671740:web:0b04658c3e80a55beaa2f9",
+      measurementId: "G-JPKV9WY9XB"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ⚠️ Admin Telegram Numeric User IDs များကို ဒီမှာ ထည့်ပါ (ဥပမာ: ["123456789"])
-    const ADMIN_IDS = ["YOUR_TELEGRAM_ID"];
+    // သင့် Telegram ID သိရင် ဒီထဲ ထည့်ထားနိုင်ပါတယ် (မထည့်ရသေးလည်း Header ကို ၅ ချက်နှိပ်ပြီး PIN: 2026 နဲ့ ဝင်လို့ရပါတယ်)
+    const ADMIN_IDS = [];
     const JETTON_MASTER = "EQA1R_LuQCLHlMgOo1S4G7Y7W1cd0FrAkbA10Zq7rddKxi9k";
-    const BOT_USERNAME = "YOUR_BOT_USERNAME"; // @ မပါဘဲ Bot Username ထည့်ပါ
 
     const tg = window.Telegram.WebApp;
     tg.expand();
@@ -324,25 +325,46 @@
     const userId = String(tgUser.id);
     const startParam = tg.initDataUnsafe?.start_param || "";
 
-    // Show Admin Button if ID matches
-    if (ADMIN_IDS.includes(userId) || userId === "demo_user_1") {
+    let isAdminUnlocked = ADMIN_IDS.includes(userId);
+    if (isAdminUnlocked) {
       document.getElementById("btn-admin-open").classList.remove("hidden");
     }
 
     document.getElementById("ui-username").innerText = tgUser.first_name || "Holder";
 
-    // Global State
     let config = {
       minWithdrawLevel: 3,
       tokensPerLevel: 1000,
       minWithdrawPts: 5000,
       refBonus: 500,
-      dailyReward: 200
+      dailyReward: 200,
+      adminPin: "2026"
     };
     let userData = { points: 0, refCount: 0, completedTasks: {}, lastDaily: 0 };
     let walletAddress = null;
     let tokenBalance = 0;
     let currentLevel = 1;
+
+    // Secret 5-Tap Admin Unlock
+    let tapCount = 0;
+    let tapTimer = null;
+    window.handleSecretAdminTap = () => {
+      tapCount++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => { tapCount = 0; }, 2000);
+      if (tapCount >= 5) {
+        tapCount = 0;
+        const pin = prompt("Enter Admin PIN:");
+        if (pin === String(config.adminPin || "2026")) {
+          isAdminUnlocked = true;
+          document.getElementById("btn-admin-open").classList.remove("hidden");
+          switchTab("admin");
+          renderTasks();
+        } else if (pin !== null) {
+          alert("Wrong PIN!");
+        }
+      }
+    };
 
     // 1. Load & Listen to Admin Config
     onValue(ref(db, "ownership_v1/config"), (snap) => {
@@ -362,12 +384,12 @@
       document.getElementById("lbl-min-lv").innerText = `Lv ${config.minWithdrawLevel}`;
       document.getElementById("lbl-min-wd").innerText = Number(config.minWithdrawPts).toLocaleString();
 
-      // Populate Admin Inputs
       document.getElementById("adm-min-lv").value = config.minWithdrawLevel;
       document.getElementById("adm-tok-per-lv").value = config.tokensPerLevel;
       document.getElementById("adm-min-wd").value = config.minWithdrawPts;
       document.getElementById("adm-ref-bonus").value = config.refBonus;
       document.getElementById("adm-daily-pts").value = config.dailyReward;
+      document.getElementById("adm-pin").value = config.adminPin || "2026";
     }
 
     // 2. Initialize User & Handle Referral
@@ -411,7 +433,6 @@
       document.getElementById("ui-ref-count").innerText = userData.refCount || 0;
       document.getElementById("ui-ref-earned").innerText = `${((userData.refCount || 0) * config.refBonus).toLocaleString()} PTS`;
 
-      // Daily Button State (24h cooldown)
       const now = Date.now();
       const canDaily = (now - (userData.lastDaily || 0)) >= 86400000;
       const btnDaily = document.getElementById("btn-daily");
@@ -429,7 +450,7 @@
       renderTasks();
     }
 
-    // 3. Level Calculation from Wallet Token Balance
+    // 3. Level Calculation
     function recalcLevel() {
       const perLv = Math.max(1, Number(config.tokensPerLevel));
       currentLevel = Math.floor(tokenBalance / perLv) + 1;
@@ -510,7 +531,7 @@
               <p class="text-xs text-amber-400 font-semibold mt-0.5">+${t.reward} PTS</p>
             </div>
             <div class="flex items-center gap-2">
-              ${ADMIN_IDS.includes(userId) || userId === "demo_user_1" ? `<button onclick="deleteTask('${id}')" class="text-rose-400 text-xs px-2 py-1">🗑️</button>` : ""}
+              ${isAdminUnlocked ? `<button onclick="deleteTask('${id}')" class="text-rose-400 text-xs px-2 py-1">🗑️</button>` : ""}
               <button ${isDone ? "disabled" : ""} onclick="doTask('${id}', ${t.reward}, '${t.url}')"
                 class="px-4 py-2 rounded-xl text-xs font-extrabold ${isDone ? "bg-zinc-800 text-zinc-500" : "bg-amber-500 text-zinc-950"}">
                 ${isDone ? "Done ✓" : "Start"}
@@ -575,12 +596,10 @@
       alert("✅ Withdrawal request submitted!");
     };
 
-    // Listen to Withdrawals (for User History & Admin Queue)
     onValue(ref(db, "ownership_v1/withdrawals"), (snap) => {
       const data = snap.val() || {};
       const list = Object.entries(data).reverse();
 
-      // User History
       const mine = list.filter(([, w]) => w.userId === userId);
       document.getElementById("wd-history").innerHTML = mine.length ? mine.map(([, w]) => `
         <div class="flex justify-between items-center bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
@@ -588,7 +607,6 @@
           <span class="uppercase font-bold ${w.status === 'paid' ? 'text-emerald-400' : w.status === 'rejected' ? 'text-rose-400' : 'text-amber-400'}">${w.status}</span>
         </div>`).join("") : "No withdrawals yet.";
 
-      // Admin Pending Queue
       const pending = list.filter(([, w]) => w.status === "pending");
       document.getElementById("adm-wd-list").innerHTML = pending.length ? pending.map(([wid, w]) => `
         <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2">
@@ -611,7 +629,8 @@
         tokensPerLevel: Number(document.getElementById("adm-tok-per-lv").value) || 1000,
         minWithdrawPts: Number(document.getElementById("adm-min-wd").value) || 5000,
         refBonus: Number(document.getElementById("adm-ref-bonus").value) || 500,
-        dailyReward: Number(document.getElementById("adm-daily-pts").value) || 200
+        dailyReward: Number(document.getElementById("adm-daily-pts").value) || 200,
+        adminPin: document.getElementById("adm-pin").value.trim() || "2026"
       });
       alert("✅ Settings Updated Live!");
     };
@@ -637,8 +656,15 @@
     };
 
     // Helpers
+    let cachedBotUsername = "";
+    fetch("https://api.telegram.org/bot9051814925:AAFSt1XTIbZTW3aP1Pt78dttnp3v3gBzPdI/getMe")
+      .then(r => r.json())
+      .then(d => { if (d.ok) cachedBotUsername = d.result.username; })
+      .catch(() => {});
+
     window.copyInviteLink = () => {
-      const link = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+      const uname = cachedBotUsername || "OwnershipCoinBot";
+      const link = `https://t.me/${uname}?start=ref_${userId}`;
       navigator.clipboard.writeText(link);
       alert("Invite Link Copied:\n" + link);
     };
@@ -665,7 +691,6 @@
       }
     };
 
-    // TON Connect Setup
     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
       manifestUrl: `${window.location.origin}/tonconnect-manifest.json`,
       buttonRootId: "ton-connect"
