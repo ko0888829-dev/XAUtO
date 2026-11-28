@@ -357,7 +357,6 @@
           <span class="text-[10px] text-zinc-400">Admin ID: 5330848428</span>
         </div>
 
-        <!-- Direct User Level & Verify Manager -->
         <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800 space-y-2 text-xs">
           <p class="font-bold text-amber-300">👑 Manage User Directly (Level & Mining)</p>
           <div class="grid grid-cols-2 gap-2">
@@ -374,7 +373,6 @@
           </div>
         </div>
 
-        <!-- Add New Task -->
         <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800 space-y-2.5 text-xs">
           <p class="font-bold text-emerald-400">➕ Add New Task</p>
           <input id="adm-task-title" type="text" placeholder="Task Title (e.g. Join PRIZM Channel)" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-white" />
@@ -394,7 +392,6 @@
           </button>
         </div>
 
-        <!-- System Settings -->
         <div class="space-y-2.5 text-xs">
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -444,7 +441,6 @@
         <div id="adm-lv-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
       </div>
 
-      <!-- Pending Withdrawals with Full Friendly Address + Copy + Direct Pay -->
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
         <h3 class="font-extrabold text-sm text-rose-400">💸 Pending Withdrawals (Send PZM to User)</h3>
         <div id="adm-wd-list" class="space-y-2.5"><p class="text-zinc-500">None</p></div>
@@ -523,7 +519,10 @@
 
     const tgUser = tg?.initDataUnsafe?.user || { id: "5330848428", first_name: "Admin", username: "admin" };
     const userId = String(tgUser.id);
-    const startParam = tg?.initDataUnsafe?.start_param || "";
+
+    // Extract Referral ID from BOTH Telegram start_param AND URL query ?ref=
+    const urlParams = new URLSearchParams(window.location.search);
+    const startParam = tg?.initDataUnsafe?.start_param || urlParams.get("tgWebAppStartParam") || urlParams.get("ref") || "";
 
     let isAdmin = ADMIN_IDS.includes(userId);
     if (isAdmin) document.getElementById("btn-admin-top").classList.remove("hidden");
@@ -550,11 +549,11 @@
       completedTasks: {}
     };
 
-    let walletAddress = null;         // Raw address (0:...)
-    let friendlyWalletAddress = null; // User-friendly address (UQ...)
+    let walletAddress = null;
+    let friendlyWalletAddress = null;
     let pzmPriceUsd = 0.000088;
     let tradeMode = "buy";
-    const claimingTasks = {}; // Lock to prevent double-clicking tasks
+    const claimingTasks = {};
 
     function getHourlyRate(level) {
       const lv = Math.min(MAX_LEVEL, Math.max(1, Number(level || 1)));
@@ -595,7 +594,7 @@
       return btoa(bin);
     }
 
-    // 1. Direct Native Transfer (0.1 GRAM + Memo) -> Unlocks Mining Immediately
+    // 1. Direct Native Transfer (0.1 GRAM + Memo) -> Unlocks Mining & Credits Referrer
     window.sendDirectVerifyTx = async () => {
       if (!walletAddress) {
         tonConnectUI.openModal();
@@ -629,7 +628,10 @@
             miningStart: Date.now(),
             wallet: friendlyWalletAddress || walletAddress
           });
-          if (user.invitedBy) {
+
+          // Credit Referrer if invited and not yet rewarded
+          if (user.invitedBy && !user.refRewarded) {
+            await update(ref(db, `pzm_mining_v2/users/${userId}`), { refRewarded: true });
             await update(ref(db, `pzm_mining_v2/users/${user.invitedBy}`), {
               qualifiedRefs: increment(1),
               poolBalance: increment(Number(config.refReward))
@@ -804,19 +806,19 @@
       renderAllUI();
     });
 
+    // Init & Sync User + Referral Tracking
     async function initUser() {
       const uRef = ref(db, `pzm_mining_v2/users/${userId}`);
       const snap = await get(uRef);
+      const cleanRefId = startParam.startsWith("ref_") ? startParam.replace("ref_", "").trim() : "";
+
       if (!snap.exists()) {
         let invitedBy = null;
-        if (startParam && startParam.startsWith("ref_")) {
-          const refId = startParam.replace("ref_", "");
-          if (refId !== userId) {
-            invitedBy = refId;
-            await update(ref(db, `pzm_mining_v2/users/${refId}`), {
-              refCount: increment(1)
-            });
-          }
+        if (cleanRefId && cleanRefId !== userId) {
+          invitedBy = cleanRefId;
+          await update(ref(db, `pzm_mining_v2/users/${cleanRefId}`), {
+            refCount: increment(1)
+          });
         }
         await set(uRef, {
           name: tgUser.first_name || "Miner",
@@ -828,11 +830,21 @@
           verifyStatus: "unverified",
           miningStart: 0,
           invitedBy,
+          refRewarded: false,
           refCount: 0,
           qualifiedRefs: 0,
           completedTasks: {},
           createdAt: Date.now()
         });
+      } else {
+        // If user existed earlier without an inviter, bind inviter now
+        const existing = snap.val();
+        if (!existing.invitedBy && cleanRefId && cleanRefId !== userId) {
+          await update(uRef, { invitedBy: cleanRefId });
+          await update(ref(db, `pzm_mining_v2/users/${cleanRefId}`), {
+            refCount: increment(1)
+          });
+        }
       }
 
       onValue(uRef, (s) => {
@@ -974,7 +986,7 @@
     };
     window.closeLevelsModal = () => document.getElementById("levels-modal").classList.add("hidden");
 
-    // ==================== ONE-TIME TASK CLAIM SYSTEM (NO DUPLICATE REWARDS) ====================
+    // ==================== ONE-TIME TASK CLAIM SYSTEM ====================
     let cachedTasks = {};
     onValue(ref(db, "pzm_mining_v2/tasks"), (snap) => {
       cachedTasks = snap.val() || {};
@@ -1019,7 +1031,6 @@
 
     const openedTasks = {};
     window.handleTaskClick = async (id) => {
-      // Strict anti-spam & one-time check
       if (claimingTasks[id] || user.completedTasks?.[id]) return;
 
       const t = cachedTasks[id];
@@ -1054,14 +1065,12 @@
         if (t.link && t.link.startsWith("http")) window.open(t.link, "_blank");
       }
 
-      // Double check database directly before crediting
       const checkSnap = await get(ref(db, `pzm_mining_v2/users/${userId}/completedTasks/${id}`));
       if (checkSnap.exists()) {
         claimingTasks[id] = false;
         return;
       }
 
-      // Immediately lock button in UI
       const btn = document.getElementById(`task-btn-${id}`);
       if (btn) {
         btn.disabled = true;
@@ -1099,7 +1108,6 @@
       await remove(ref(db, `pzm_mining_v2/tasks/${id}`));
     };
 
-    // ==================== WITHDRAWAL SUBMISSION (STORES USER-FRIENDLY WALLET) ====================
     window.submitWithdraw = async () => {
       const amt = Number(document.getElementById("wd-amt-input").value);
       if (Number(user.level || 1) < Number(config.minWithdrawLevel)) {
@@ -1175,7 +1183,8 @@
         verifyStatus: "verified",
         miningStart: Date.now()
       });
-      if (uData.invitedBy) {
+      if (uData.invitedBy && !uData.refRewarded) {
+        await update(ref(db, `pzm_mining_v2/users/${targetUid}`), { refRewarded: true });
         await update(ref(db, `pzm_mining_v2/users/${uData.invitedBy}`), {
           qualifiedRefs: increment(1),
           poolBalance: increment(Number(config.refReward))
@@ -1221,18 +1230,26 @@
     window.adminDirectVerifyUser = async () => {
       const uid = document.getElementById("adm-target-uid").value.trim() || userId;
       try {
+        const uSnap = await get(ref(db, `pzm_mining_v2/users/${uid}`));
+        const uData = uSnap.val() || {};
         await update(ref(db, `pzm_mining_v2/users/${uid}`), {
           verified: true,
           verifyStatus: "verified",
           miningStart: Date.now()
         });
+        if (uData.invitedBy && !uData.refRewarded) {
+          await update(ref(db, `pzm_mining_v2/users/${uid}`), { refRewarded: true });
+          await update(ref(db, `pzm_mining_v2/users/${uData.invitedBy}`), {
+            qualifiedRefs: increment(1),
+            poolBalance: increment(Number(config.refReward))
+          });
+        }
         alert(`✅ Mining activated for User ${uid}!`);
       } catch (e) {
         alert("Failed: " + e.message);
       }
     };
 
-    // ==================== ADMIN WITHDRAWAL QUEUE (FULL ADDRESS + COPY + DIRECT PAY) ====================
     onValue(ref(db, "pzm_mining_v2/withdrawals"), (snap) => {
       const all = Object.entries(snap.val() || {}).reverse();
       const mine = all.filter(([, w]) => w.userId === userId);
