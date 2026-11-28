@@ -235,7 +235,7 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 4: FRIENDS ==================== -->
+    <!-- ==================== TAB 4: FRIENDS (WITH VERIFIED / NOT VERIFIED LIST) ==================== -->
     <section id="tab-friends" class="hidden space-y-4">
       <div class="text-center space-y-1">
         <p class="text-[10px] font-bold tracking-widest text-amber-400 uppercase">PZM MINING REFERRAL</p>
@@ -270,6 +270,17 @@
       <div class="oc-card rounded-2xl p-4">
         <p class="text-xs font-bold text-zinc-400">Referral rewards</p>
         <p class="text-2xl font-extrabold text-emerald-400 mt-1"><span id="stat-ref-earned">0.00</span> PZM <span class="text-xs text-zinc-400 font-normal">earned</span></p>
+      </div>
+
+      <!-- Invited Friends List (Shows Name, ID, Verified vs Not Verified) -->
+      <div class="oc-card rounded-3xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-extrabold text-white">👥 Invited Friends Status</h3>
+          <span id="ref-list-count" class="text-[11px] text-zinc-400">0 friends</span>
+        </div>
+        <div id="invited-friends-list" class="space-y-2 text-xs">
+          <p class="text-zinc-500 text-center py-4">No friends invited yet.</p>
+        </div>
       </div>
     </section>
 
@@ -520,7 +531,6 @@
     const tgUser = tg?.initDataUnsafe?.user || { id: "5330848428", first_name: "Admin", username: "admin" };
     const userId = String(tgUser.id);
 
-    // Extract Referral ID from BOTH Telegram start_param AND URL query ?ref=
     const urlParams = new URLSearchParams(window.location.search);
     const startParam = tg?.initDataUnsafe?.start_param || urlParams.get("tgWebAppStartParam") || urlParams.get("ref") || "";
 
@@ -629,7 +639,6 @@
             wallet: friendlyWalletAddress || walletAddress
           });
 
-          // Credit Referrer if invited and not yet rewarded
           if (user.invitedBy && !user.refRewarded) {
             await update(ref(db, `pzm_mining_v2/users/${userId}`), { refRewarded: true });
             await update(ref(db, `pzm_mining_v2/users/${user.invitedBy}`), {
@@ -837,7 +846,6 @@
           createdAt: Date.now()
         });
       } else {
-        // If user existed earlier without an inviter, bind inviter now
         const existing = snap.val();
         if (!existing.invitedBy && cleanRefId && cleanRefId !== userId) {
           await update(uRef, { invitedBy: cleanRefId });
@@ -852,6 +860,52 @@
           user = { ...user, ...s.val() };
           renderAllUI();
           renderTasksList();
+        }
+      });
+
+      // Live Watch All Users to Display Invited Friends & Their Verified Status
+      onValue(ref(db, "pzm_mining_v2/users"), (allSnap) => {
+        const allUsers = allSnap.val() || {};
+        const myInvites = Object.entries(allUsers)
+          .filter(([, u]) => String(u.invitedBy || "") === userId)
+          .map(([id, u]) => ({ id, ...u }))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+        const total = myInvites.length;
+        const qualified = myInvites.filter(u => !!u.verified).length;
+        const inProgress = total - qualified;
+
+        document.getElementById("stat-ref-total").innerText = total;
+        document.getElementById("stat-ref-qual").innerText = qualified;
+        document.getElementById("stat-ref-pending").innerText = inProgress;
+        document.getElementById("stat-ref-earned").innerText = (qualified * Number(config.refReward)).toFixed(2);
+        document.getElementById("ref-list-count").innerText = `${total} friend${total === 1 ? "" : "s"}`;
+
+        const listEl = document.getElementById("invited-friends-list");
+        if (!myInvites.length) {
+          listEl.innerHTML = `<p class="text-zinc-500 text-center py-4">No friends invited yet.</p>`;
+        } else {
+          listEl.innerHTML = myInvites.map(f => {
+            const isVer = !!f.verified;
+            return `
+              <div class="bg-[#0b0d12] p-3 rounded-2xl border ${isVer ? "border-emerald-500/30" : "border-zinc-800"} flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full ${isVer ? "bg-emerald-500/20 text-emerald-300" : "bg-zinc-800 text-zinc-400"} flex items-center justify-center font-extrabold text-xs">
+                    ${(f.name || "U").charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p class="font-bold text-white">${f.name || "Miner"} <span class="text-[10px] text-zinc-500">• LV ${f.level || 1}</span></p>
+                    <p class="text-[10px] font-mono text-zinc-400">ID: ${f.id}${f.username ? ` (@${f.username})` : ""}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  ${isVer
+                    ? `<span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-extrabold text-[10px]">✓ Verified (+${config.refReward} PZM)</span>`
+                    : `<span class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-300 font-bold text-[10px]">⏳ Not Verified</span>`
+                  }
+                </div>
+              </div>`;
+          }).join("");
         }
       });
     }
@@ -918,13 +972,6 @@
         document.getElementById("wd-lock-badge").className = "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/20 text-emerald-400";
         document.getElementById("wd-lock-badge").innerText = `✓ LV ${lv} Unlocked`;
       }
-
-      const totalRef = Number(user.refCount || 0);
-      const qualRef = Number(user.qualifiedRefs || 0);
-      document.getElementById("stat-ref-total").innerText = totalRef;
-      document.getElementById("stat-ref-qual").innerText = qualRef;
-      document.getElementById("stat-ref-pending").innerText = Math.max(0, totalRef - qualRef);
-      document.getElementById("stat-ref-earned").innerText = (qualRef * Number(config.refReward)).toFixed(2);
     }
 
     setInterval(() => {
