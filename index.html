@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>PZM MINING — PRIZM Protocol</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+  <script src="https://unpkg.com/@tonconnect/ui@2.0.6/dist/tonconnect-ui.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -357,16 +357,21 @@
           <span class="text-[10px] text-zinc-400">Admin ID: 5330848428</span>
         </div>
 
-        <!-- Direct User Level Setter -->
+        <!-- Direct User Level & Verify Manager -->
         <div class="bg-[#0b0d12] p-3 rounded-2xl border border-zinc-800 space-y-2 text-xs">
-          <p class="font-bold text-amber-300">👑 Set User Level Directly (LV 1 – 100)</p>
+          <p class="font-bold text-amber-300">👑 Manage User Directly (Level & Mining)</p>
           <div class="grid grid-cols-2 gap-2">
             <input id="adm-target-uid" type="text" placeholder="User Telegram ID" class="bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-white" />
             <input id="adm-target-lv" type="number" min="1" max="100" placeholder="Level (1 - 100)" class="bg-zinc-900 border border-zinc-700 rounded-xl p-2 text-white" />
           </div>
-          <button onclick="adminSetUserLevel()" class="w-full py-2 rounded-xl gold-btn font-extrabold">
-            Update User Level
-          </button>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="adminSetUserLevel()" class="py-2 rounded-xl gold-btn font-extrabold">
+              Update Level
+            </button>
+            <button onclick="adminDirectVerifyUser()" class="py-2 rounded-xl mint-btn font-extrabold">
+              Activate Mining ✓
+            </button>
+          </div>
         </div>
 
         <!-- Add New Task -->
@@ -394,28 +399,28 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="text-zinc-400 block mb-1">Min Withdraw Level</label>
-              <input id="adm-min-wd-lv" type="number" min="1" max="100" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+              <input id="adm-min-wd-lv" type="number" min="1" max="100" value="3" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
             <div>
               <label class="text-zinc-400 block mb-1">Promote Fee (GRAM)</label>
-              <input id="adm-promo-fee" type="number" step="0.1" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+              <input id="adm-promo-fee" type="number" step="0.1" value="0.5" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="text-zinc-400 block mb-1">Min Withdraw PZM</label>
-              <input id="adm-min-wd-amt" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+              <input id="adm-min-wd-amt" type="number" value="100" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
             <div>
               <label class="text-zinc-400 block mb-1">Referral Reward (PZM)</label>
-              <input id="adm-ref-rew" type="number" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+              <input id="adm-ref-rew" type="number" value="100" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
             </div>
           </div>
 
           <div>
             <label class="text-zinc-400 block mb-1">Admin Secret PIN</label>
-            <input id="adm-pin" type="text" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
+            <input id="adm-pin" type="text" value="2026" class="w-full bg-[#0b0d12] border border-zinc-800 rounded-xl p-2 text-white font-bold" />
           </div>
 
           <button onclick="saveAdminConfig()" class="w-full py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-white font-extrabold">
@@ -439,9 +444,10 @@
         <div id="adm-lv-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
       </div>
 
+      <!-- Pending Withdrawals with Full Friendly Address + Copy + Direct Pay -->
       <div class="oc-card rounded-3xl p-4 space-y-2 text-xs">
-        <h3 class="font-extrabold text-sm text-rose-400">💸 Pending Withdrawals</h3>
-        <div id="adm-wd-list" class="space-y-2"><p class="text-zinc-500">None</p></div>
+        <h3 class="font-extrabold text-sm text-rose-400">💸 Pending Withdrawals (Send PZM to User)</h3>
+        <div id="adm-wd-list" class="space-y-2.5"><p class="text-zinc-500">None</p></div>
       </div>
     </section>
 
@@ -487,11 +493,10 @@
     </div>
   </nav>
 
-  <!-- FIREBASE & OFFICIAL @ton/core APP LOGIC -->
+  <!-- FIREBASE & APP LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, get, set, update, push, remove, onValue, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-    import { beginCell, Address, toNano } from "https://esm.sh/@ton/core@0.56.3";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB-XOl5CdJnC6WwkcX-HBkBTElw_YhC03M",
@@ -513,12 +518,12 @@
     const ADMIN_IDS = ["5330848428"];
     const MAX_LEVEL = 100;
 
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+    const tg = window.Telegram?.WebApp;
+    if (tg) tg.expand();
 
-    const tgUser = tg.initDataUnsafe?.user || { id: "5330848428", first_name: "Admin", username: "admin" };
+    const tgUser = tg?.initDataUnsafe?.user || { id: "5330848428", first_name: "Admin", username: "admin" };
     const userId = String(tgUser.id);
-    const startParam = tg.initDataUnsafe?.start_param || "";
+    const startParam = tg?.initDataUnsafe?.start_param || "";
 
     let isAdmin = ADMIN_IDS.includes(userId);
     if (isAdmin) document.getElementById("btn-admin-top").classList.remove("hidden");
@@ -545,9 +550,11 @@
       completedTasks: {}
     };
 
-    let walletAddress = null;
+    let walletAddress = null;         // Raw address (0:...)
+    let friendlyWalletAddress = null; // User-friendly address (UQ...)
     let pzmPriceUsd = 0.000088;
     let tradeMode = "buy";
+    const claimingTasks = {}; // Lock to prevent double-clicking tasks
 
     function getHourlyRate(level) {
       const lv = Math.min(MAX_LEVEL, Math.max(1, Number(level || 1)));
@@ -565,17 +572,30 @@
       return 12000 + (lv - 3) * 6500;
     }
 
-    // Official @ton/core Comment Payload Builder (100% Accepted by Tonkeeper W5 with Memo)
-    function makeOfficialCommentPayload(memoText) {
-      return beginCell()
-        .storeUint(0, 32)
-        .storeStringTail(memoText)
-        .endCell()
-        .toBoc()
-        .toString("base64");
+    function buildCommentBocBase64(text) {
+      const textBytes = new TextEncoder().encode(text);
+      const dataLen = 4 + textBytes.length;
+      const cellData = new Uint8Array(2 + dataLen);
+      cellData[0] = 0;
+      cellData[1] = dataLen * 2;
+      cellData.set(textBytes, 6);
+
+      const header = new Uint8Array([
+        0xb5, 0xee, 0x9c, 0x72,
+        0x01, 0x01, 0x01, 0x01, 0x00,
+        cellData.length, 0x00
+      ]);
+
+      const fullBoc = new Uint8Array(header.length + cellData.length);
+      fullBoc.set(header, 0);
+      fullBoc.set(cellData, header.length);
+
+      let bin = "";
+      for (let i = 0; i < fullBoc.length; i++) bin += String.fromCharCode(fullBoc[i]);
+      return btoa(bin);
     }
 
-    // 1. Direct Native Transfer (0.1 GRAM + Memo) -> Auto-Starts Mining Immediately on Confirm!
+    // 1. Direct Native Transfer (0.1 GRAM + Memo) -> Unlocks Mining Immediately
     window.sendDirectVerifyTx = async () => {
       if (!walletAddress) {
         tonConnectUI.openModal();
@@ -588,18 +608,17 @@
           messages: [
             {
               address: RECEIVER_WALLET,
-              amount: toNano("0.1").toString(), // 0.1 GRAM
-              payload: makeOfficialCommentPayload(memo)
+              amount: "100000000",
+              payload: buildCommentBocBase64(memo)
             }
           ]
         });
 
-        // Once wallet confirms transaction, immediately unlock mining!
         if (result && result.boc) {
           await push(ref(db, "pzm_mining_v2/verifications"), {
             userId,
             name: tgUser.first_name || "Miner",
-            wallet: walletAddress,
+            wallet: friendlyWalletAddress || walletAddress,
             proof: `Paid 0.1 GRAM (Memo: ${memo})`,
             status: "approved",
             createdAt: Date.now()
@@ -608,7 +627,7 @@
             verified: true,
             verifyStatus: "verified",
             miningStart: Date.now(),
-            wallet: walletAddress
+            wallet: friendlyWalletAddress || walletAddress
           });
           if (user.invitedBy) {
             await update(ref(db, `pzm_mining_v2/users/${user.invitedBy}`), {
@@ -616,7 +635,7 @@
               poolBalance: increment(Number(config.refReward))
             });
           }
-          tg.HapticFeedback?.notificationOccurred("success");
+          tg?.HapticFeedback?.notificationOccurred("success");
           alert("🎉 0.1 GRAM verified! Your PZM Mining has started!");
         }
       } catch (e) {
@@ -625,7 +644,7 @@
       }
     };
 
-    // 2. Direct PZM Jetton Transfer (+ Memo) -> Auto-Upgrades Level Immediately on Confirm!
+    // 2. Direct PZM Jetton Transfer (+ Memo) -> Upgrades Level Immediately
     window.sendDirectLevelUpgradeTx = async () => {
       if (!walletAddress) {
         tonConnectUI.openModal();
@@ -638,35 +657,19 @@
       const memo = `lv${targetLv}_${userId}`;
 
       try {
-        // Resolve user's PZM Jetton wallet via TonAPI or TonCenter
-        let pzmJettonWallet = null;
         const r1 = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons/${PZM_CONTRACT}`);
-        if (r1.ok) {
-          const d1 = await r1.json();
-          pzmJettonWallet = d1?.wallet_address?.address;
-        }
-        if (!pzmJettonWallet) {
-          const addrSlice = beginCell().storeAddress(Address.parse(walletAddress)).endCell().toBoc().toString("base64");
-          const rpcRes = await fetch("https://toncenter.com/api/v2/runGetMethod", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              address: PZM_CONTRACT,
-              method: "get_wallet_address",
-              stack: [["tvm.Slice", addrSlice]]
-            })
-          });
-          const rpcData = await rpcRes.json();
-          const { Cell } = await import("https://esm.sh/@ton/core@0.56.3");
-          pzmJettonWallet = Cell.fromBase64(rpcData.result.stack[0][1].bytes).beginParse().loadAddress().toString();
+        if (!r1.ok) return alert(`You need at least ${costPzm.toLocaleString()} PZM in your wallet!`);
+        const d1 = await r1.json();
+        const pzmJettonWallet = d1?.wallet_address?.address;
+        const pzmBal = Number(d1?.balance || 0) / 1e9;
+
+        if (!pzmJettonWallet || pzmBal < costPzm) {
+          return alert(`Insufficient PZM! You have ${pzmBal.toFixed(2)} PZM, need ${costPzm.toLocaleString()} PZM.`);
         }
 
-        const forwardComment = beginCell()
-          .storeUint(0, 32)
-          .storeStringTail(memo)
-          .endCell();
-
-        const jettonTransferBody = beginCell()
+        const { beginCell, Address, toNano } = await import("https://cdn.jsdelivr.net/npm/@ton/core@0.56.3/+esm");
+        const forwardComment = beginCell().storeUint(0, 32).storeStringTail(memo).endCell();
+        const jettonBody = beginCell()
           .storeUint(0xf8a7ea5, 32)
           .storeUint(0, 64)
           .storeCoins(BigInt(Math.round(costPzm * 1e9)))
@@ -685,8 +688,8 @@
           messages: [
             {
               address: pzmJettonWallet,
-              amount: toNano("0.05").toString(),
-              payload: jettonTransferBody
+              amount: "50000000",
+              payload: jettonBody
             }
           ]
         });
@@ -704,16 +707,16 @@
           await update(ref(db, `pzm_mining_v2/users/${userId}`), {
             level: targetLv
           });
-          tg.HapticFeedback?.notificationOccurred("success");
+          tg?.HapticFeedback?.notificationOccurred("success");
           alert(`🎉 Upgraded to Level ${targetLv}! Your speed is now ${getHourlyRate(targetLv)} PZM/hr!`);
         }
       } catch (e) {
         console.error(e);
-        alert(`Transaction cancelled or insufficient PZM (${costPzm.toLocaleString()} PZM) / GRAM gas.`);
+        alert("Transaction cancelled or failed.");
       }
     };
 
-    // 3. User Promote Task (Native GRAM + Memo)
+    // 3. User Promote Task
     window.togglePromoteBox = () => document.getElementById("promote-task-box").classList.toggle("hidden");
 
     window.payAndSubmitPromoteTask = async () => {
@@ -735,8 +738,8 @@
           messages: [
             {
               address: RECEIVER_WALLET,
-              amount: toNano(String(feeGram)).toString(),
-              payload: makeOfficialCommentPayload(memo)
+              amount: String(Math.round(feeGram * 1e9)),
+              payload: buildCommentBocBase64(memo)
             }
           ]
         });
@@ -759,7 +762,7 @@
           document.getElementById("promo-link").value = "";
           document.getElementById("promo-chat-id").value = "";
           togglePromoteBox();
-          alert(`✅ Fee paid with Memo (${memo}) & task submitted! Admin will publish it shortly.`);
+          alert(`✅ Fee paid with Memo (${memo}) & task submitted!`);
         }
       } catch (e) {
         console.error(e);
@@ -836,6 +839,7 @@
         if (s.exists()) {
           user = { ...user, ...s.val() };
           renderAllUI();
+          renderTasksList();
         }
       });
     }
@@ -942,7 +946,7 @@
         miningStart: Date.now()
       });
       document.getElementById("live-ticker").innerText = "+0.0000";
-      tg.HapticFeedback?.notificationOccurred("success");
+      tg?.HapticFeedback?.notificationOccurred("success");
     };
 
     window.openLevelsModal = () => {
@@ -970,16 +974,24 @@
     };
     window.closeLevelsModal = () => document.getElementById("levels-modal").classList.add("hidden");
 
+    // ==================== ONE-TIME TASK CLAIM SYSTEM (NO DUPLICATE REWARDS) ====================
+    let cachedTasks = {};
     onValue(ref(db, "pzm_mining_v2/tasks"), (snap) => {
-      let tasks = snap.val();
-      if (!tasks) {
-        tasks = {
+      cachedTasks = snap.val() || {};
+      if (!snap.exists()) {
+        cachedTasks = {
           t1: { title: "Trade PZM on DeDust", reward: 25, link: "https://dedust.io/swap/TON/EQDROsytSxLtDp_2pRIEainUGqZPRBbXkwayVn7VAT7bHHWL", checkJoin: false, chatId: "" }
         };
-        set(ref(db, "pzm_mining_v2/tasks"), tasks);
+        set(ref(db, "pzm_mining_v2/tasks"), cachedTasks);
       }
+      renderTasksList();
+    });
+
+    function renderTasksList() {
       const done = user.completedTasks || {};
-      document.getElementById("tasks-list").innerHTML = Object.entries(tasks).map(([id, t]) => `
+      document.getElementById("tasks-list").innerHTML = Object.entries(cachedTasks).map(([id, t]) => {
+        const isCompleted = !!done[id];
+        return `
         <div class="oc-card rounded-2xl p-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <svg class="w-9 h-9 shrink-0" viewBox="0 0 100 100">
@@ -996,49 +1008,73 @@
           </div>
           <div class="flex items-center gap-2">
             ${isAdmin ? `<button onclick="deleteTask('${id}')" class="text-rose-400 text-xs px-1.5">🗑️</button>` : ""}
-            <button id="task-btn-${id}" ${done[id] ? "disabled" : ""} onclick="handleTaskClick('${id}')"
-              class="px-4 py-2 rounded-full font-extrabold text-xs ${done[id] ? "bg-zinc-800 text-zinc-500" : "gold-btn"}">
-              ${done[id] ? "Done ✓" : "↗ Go"}
+            <button id="task-btn-${id}" ${isCompleted ? "disabled" : ""} onclick="handleTaskClick('${id}')"
+              class="px-4 py-2 rounded-full font-extrabold text-xs ${isCompleted ? "bg-zinc-800 text-zinc-500 cursor-not-allowed" : "gold-btn"}">
+              ${isCompleted ? "Done ✓" : "↗ Go"}
             </button>
           </div>
-        </div>`).join("");
-    });
+        </div>`;
+      }).join("");
+    }
 
     const openedTasks = {};
     window.handleTaskClick = async (id) => {
-      const tSnap = await get(ref(db, `pzm_mining_v2/tasks/${id}`));
-      if (!tSnap.exists()) return;
-      const t = tSnap.val();
+      // Strict anti-spam & one-time check
+      if (claimingTasks[id] || user.completedTasks?.[id]) return;
+
+      const t = cachedTasks[id];
+      if (!t) return;
 
       if (t.checkJoin && t.chatId) {
         if (!openedTasks[id]) {
           openedTasks[id] = true;
-          if (t.link) tg.openTelegramLink(t.link);
+          if (t.link && tg?.openTelegramLink) tg.openTelegramLink(t.link);
+          else if (t.link) window.open(t.link, "_blank");
           const btn = document.getElementById(`task-btn-${id}`);
           if (btn) btn.innerText = "Verify Join";
           return;
         }
+        claimingTasks[id] = true;
         try {
           const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN_CLIENT}/getChatMember?chat_id=${encodeURIComponent(t.chatId)}&user_id=${userId}`);
           const data = await res.json();
           const status = data?.result?.status;
           const isMember = ["member", "administrator", "creator"].includes(status);
           if (!isMember) {
-            if (t.link) tg.openTelegramLink(t.link);
+            claimingTasks[id] = false;
+            if (t.link && tg?.openTelegramLink) tg.openTelegramLink(t.link);
             return alert("❌ Please join the channel/group first, then tap Verify Join!");
           }
         } catch {
+          claimingTasks[id] = false;
           return alert("Could not verify membership. Make sure the bot is an admin in that channel.");
         }
       } else {
+        claimingTasks[id] = true;
         if (t.link && t.link.startsWith("http")) window.open(t.link, "_blank");
+      }
+
+      // Double check database directly before crediting
+      const checkSnap = await get(ref(db, `pzm_mining_v2/users/${userId}/completedTasks/${id}`));
+      if (checkSnap.exists()) {
+        claimingTasks[id] = false;
+        return;
+      }
+
+      // Immediately lock button in UI
+      const btn = document.getElementById(`task-btn-${id}`);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Done ✓";
+        btn.className = "px-4 py-2 rounded-full font-extrabold text-xs bg-zinc-800 text-zinc-500 cursor-not-allowed";
       }
 
       await update(ref(db, `pzm_mining_v2/users/${userId}`), {
         poolBalance: increment(Number(t.reward)),
         [`completedTasks/${id}`]: true
       });
-      tg.HapticFeedback?.notificationOccurred("success");
+      claimingTasks[id] = false;
+      tg?.HapticFeedback?.notificationOccurred("success");
     };
 
     window.adminAddTask = async () => {
@@ -1063,6 +1099,7 @@
       await remove(ref(db, `pzm_mining_v2/tasks/${id}`));
     };
 
+    // ==================== WITHDRAWAL SUBMISSION (STORES USER-FRIENDLY WALLET) ====================
     window.submitWithdraw = async () => {
       const amt = Number(document.getElementById("wd-amt-input").value);
       if (Number(user.level || 1) < Number(config.minWithdrawLevel)) {
@@ -1071,13 +1108,14 @@
       if (amt < config.minWithdrawAmt || amt > user.poolBalance) {
         return alert(`Enter amount between ${config.minWithdrawAmt} and ${user.poolBalance.toFixed(2)} PZM.`);
       }
+      const targetWallet = friendlyWalletAddress || walletAddress;
       await update(ref(db, `pzm_mining_v2/users/${userId}`), {
         poolBalance: increment(-amt)
       });
       await push(ref(db, "pzm_mining_v2/withdrawals"), {
         userId,
         name: tgUser.first_name || "Miner",
-        wallet: walletAddress,
+        wallet: targetWallet,
         amount: amt,
         level: user.level,
         status: "pending",
@@ -1087,6 +1125,7 @@
       alert("✅ Withdrawal request submitted!");
     };
 
+    // Admin Queues & Direct Actions
     onValue(ref(db, "pzm_mining_v2/promo_requests"), (snap) => {
       const pending = Object.entries(snap.val() || {}).filter(([, v]) => v.status === "pending");
       document.getElementById("adm-promo-list").innerHTML = pending.length ? pending.map(([id, v]) => `
@@ -1175,10 +1214,25 @@
         document.getElementById("adm-target-lv").value = "";
         alert(`✅ User ${uid} updated to Level ${lv}!`);
       } catch (e) {
-        alert("Failed to update level: " + e.message);
+        alert("Failed: " + e.message);
       }
     };
 
+    window.adminDirectVerifyUser = async () => {
+      const uid = document.getElementById("adm-target-uid").value.trim() || userId;
+      try {
+        await update(ref(db, `pzm_mining_v2/users/${uid}`), {
+          verified: true,
+          verifyStatus: "verified",
+          miningStart: Date.now()
+        });
+        alert(`✅ Mining activated for User ${uid}!`);
+      } catch (e) {
+        alert("Failed: " + e.message);
+      }
+    };
+
+    // ==================== ADMIN WITHDRAWAL QUEUE (FULL ADDRESS + COPY + DIRECT PAY) ====================
     onValue(ref(db, "pzm_mining_v2/withdrawals"), (snap) => {
       const all = Object.entries(snap.val() || {}).reverse();
       const mine = all.filter(([, w]) => w.userId === userId);
@@ -1190,15 +1244,27 @@
 
       const pending = all.filter(([, w]) => w.status === "pending");
       document.getElementById("adm-wd-list").innerHTML = pending.length ? pending.map(([id, w]) => `
-        <div class="bg-[#0b0d12] p-3 rounded-xl border border-zinc-800 space-y-1.5">
-          <p class="font-bold text-white">${w.name} (LV ${w.level}) — ${w.amount} PZM</p>
-          <p class="text-[10px] font-mono text-zinc-400 truncate">${w.wallet}</p>
-          <div class="grid grid-cols-2 gap-2 pt-1">
+        <div class="bg-[#0b0d12] p-3 rounded-xl border border-zinc-800 space-y-2">
+          <div class="flex justify-between items-center">
+            <p class="font-bold text-white">${w.name} (ID: ${w.userId})</p>
+            <span class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 font-extrabold">LV ${w.level} • ${w.amount} PZM</span>
+          </div>
+          <div class="bg-zinc-900/90 p-2 rounded-lg border border-zinc-800">
+            <p class="text-[10px] text-zinc-400 mb-0.5">Recipient Wallet Address:</p>
+            <p class="text-[11px] font-mono text-emerald-400 break-all select-all">${w.wallet}</p>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 pt-1">
+            <button onclick="copyUserWdWallet('${w.wallet}')" class="py-1.5 rounded-lg bg-zinc-800 text-white font-bold">📋 Copy</button>
             <button onclick="markWdPaid('${id}')" class="py-1.5 rounded-lg mint-btn font-bold">Mark Paid ✓</button>
             <button onclick="rejectItem('withdrawals', '${id}')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold">Reject</button>
           </div>
         </div>`).join("") : `<p class="text-zinc-500">None</p>`;
     });
+
+    window.copyUserWdWallet = (addr) => {
+      navigator.clipboard.writeText(addr);
+      alert("User Wallet Address Copied:\n" + addr);
+    };
 
     window.markWdPaid = async (id) => {
       await update(ref(db, `pzm_mining_v2/withdrawals/${id}`), { status: "paid" });
@@ -1267,15 +1333,24 @@
       if (wallet && wallet.account) {
         walletAddress = wallet.account.address;
         try {
+          friendlyWalletAddress = TON_CONNECT_UI.toUserFriendlyAddress(walletAddress, false);
+        } catch {
+          friendlyWalletAddress = walletAddress;
+        }
+        try {
           const r = await fetch(`https://tonapi.io/v2/accounts/${walletAddress}/jettons/${PZM_CONTRACT}`);
           if (r.ok) {
             const d = await r.json();
             const bal = Number(d.balance) / Math.pow(10, d.jetton?.decimals ?? 9);
-            await update(ref(db, `pzm_mining_v2/users/${userId}`), { wallet: walletAddress, holdingBalance: bal });
+            await update(ref(db, `pzm_mining_v2/users/${userId}`), {
+              wallet: friendlyWalletAddress,
+              holdingBalance: bal
+            });
           }
         } catch {}
       } else {
         walletAddress = null;
+        friendlyWalletAddress = null;
       }
       renderAllUI();
     });
@@ -1296,7 +1371,9 @@
     };
     window.shareInviteLink = () => {
       const link = `https://t.me/${botUname || "PzmMiningBot"}?start=ref_${userId}`;
-      tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Mine PZM tokens with me!")}`);
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Mine PZM tokens with me!")}`);
+      }
     };
     window.copyCA = () => {
       navigator.clipboard.writeText(PZM_CONTRACT);
